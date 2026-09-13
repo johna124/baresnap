@@ -3,6 +3,9 @@ BARESNAP v2.3.8 — BUNKER LICENCES
 ==============================================================================
 - SOURCE CODE (src/): Under the GNU General Public Licence v3.0 (GPLv3).
 - MANUAL AND LORE (docs/ and assets/): Licensed under the GNU Free Documentation Licence (GFDL v1.3).
+
+txt2pdf_v_1_6 and time_travel_v_1_2 source code are under the GNU General Public Licence v3.0 (GPLv3)
+txt2pdf_v_1_6 and time_travel_v_1_2 documentation are under the GNU Free Documentation Licence (GFDL v1.3)
 ==============================================================================
 GNU GENERAL PUBLIC LICENSE
                        Version 3, 29 June 2007
