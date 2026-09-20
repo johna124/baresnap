@@ -1,0 +1,361 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Catalog /Pages 3 0 R /Outlines 2 0 R /PageMode /UseOutlines >>
+endobj
+2 0 obj
+<< /Type /Outlines /First 15 0 R /Last 26 0 R /Count 12 >>
+endobj
+3 0 obj
+<< /Type /Pages /Kids [5 0 R 6 0 R 7 0 R 8 0 R 9 0 R] /Count 5 >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Courier /Encoding /WinAnsiEncoding >>
+endobj
+5 0 obj
+<< /Type /Page /Parent 3 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R >> >> /Contents 10 0 R /Annots [<< /Type /Annot /Subtype /Link /Rect [49.00 454.00 159.00 465.00] /Border [0 0 0] /Dest [5 0 R /XYZ 50.00 298.00 null] >> << /Type /Annot /Subtype /Link /Rect [49.00 442.00 180.60 453.00] /Border [0 0 0] /Dest [5 0 R /XYZ 50.00 118.00 null] >> << /Type /Annot /Subtype /Link /Rect [49.00 430.00 196.80 441.00] /Border [0 0 0] /Dest [6 0 R /XYZ 50.00 502.00 null] >> << /Type /Annot /Subtype /Link /Rect [49.00 418.00 180.60 429.00] /Border [0 0 0] /Dest [6 0 R /XYZ 50.00 238.00 null] >> << /Type /Annot /Subtype /Link /Rect [49.00 406.00 207.60 417.00] /Border [0 0 0] /Dest [7 0 R /XYZ 50.00 658.00 null] >> << /Type /Annot /Subtype /Link /Rect [49.00 394.00 142.80 405.00] /Border [0 0 0] /Dest [7 0 R /XYZ 50.00 394.00 null] >> << /Type /Annot /Subtype /Link /Rect [49.00 382.00 164.40 393.00] /Border [0 0 0] /Dest [7 0 R /XYZ 50.00 82.00 null] >> << /Type /Annot /Subtype /Link /Rect [49.00 370.00 223.80 381.00] /Border [0 0 0] /Dest [8 0 R /XYZ 50.00 550.00 null] >> << /Type /Annot /Subtype /Link /Rect [49.00 358.00 164.40 369.00] /Border [0 0 0] /Dest [8 0 R /XYZ 50.00 298.00 null] >> << /Type /Annot /Subtype /Link /Rect [49.00 346.00 153.60 357.00] /Border [0 0 0] /Dest [8 0 R /XYZ 50.00 130.00 null] >> << /Type /Annot /Subtype /Link /Rect [49.00 334.00 164.40 345.00] /Border [0 0 0] /Dest [9 0 R /XYZ 50.00 526.00 null] >> << /Type /Annot /Subtype /Link /Rect [49.00 322.00 175.20 333.00] /Border [0 0 0] /Dest [9 0 R /XYZ 50.00 310.00 null] >>] >>
+endobj
+6 0 obj
+<< /Type /Page /Parent 3 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R >> >> /Contents 11 0 R >>
+endobj
+7 0 obj
+<< /Type /Page /Parent 3 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R >> >> /Contents 12 0 R >>
+endobj
+8 0 obj
+<< /Type /Page /Parent 3 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R >> >> /Contents 13 0 R >>
+endobj
+9 0 obj
+<< /Type /Page /Parent 3 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R >> >> /Contents 14 0 R >>
+endobj
+10 0 obj
+<< /Length 4351 >>
+stream
+BT /F1 9.0 Tf 50.00 792.00 Td (==============================================================================) Tj ET
+BT /F1 9.0 Tf 50.00 780.00 Td (TXT2PDF v1.6 - THE ESPARTAN PDF GENERATOR) Tj ET
+BT /F1 9.0 Tf 50.00 768.00 Td (Zero-dependency TXT to PDF converter in pure C11) Tj ET
+BT /F1 9.0 Tf 50.00 756.00 Td (==============================================================================) Tj ET
+BT /F1 9.0 Tf 50.00 744.00 Td ("Turn plain text into structured PDFs without asking for permission.") Tj ET
+BT /F1 9.0 Tf 50.00 732.00 Td (Language:   C11 \(pure, no C++ runtime, no external libs\)) Tj ET
+BT /F1 9.0 Tf 50.00 720.00 Td (Binary:     Static, stripped, musl libc, ~58 KB) Tj ET
+BT /F1 9.0 Tf 50.00 708.00 Td (Output:     PDF 1.4 with Outlines \(Bookmarks\) and Internal Links) Tj ET
+BT /F1 9.0 Tf 50.00 696.00 Td (Status:     Production-ready) Tj ET
+BT /F1 9.0 Tf 50.00 672.00 Td (==============================================================================) Tj ET
+BT /F1 9.0 Tf 50.00 660.00 Td (QUICK START) Tj ET
+BT /F1 9.0 Tf 50.00 648.00 Td (==============================================================================) Tj ET
+BT /F1 9.0 Tf 50.00 636.00 Td (- Compile dynamically:) Tj ET
+BT /F1 9.0 Tf 50.00 624.00 Td (gcc -O2 -Wall -Wextra -std=c11 -o txt2pdf txt2pdf.c) Tj ET
+BT /F1 9.0 Tf 50.00 600.00 Td (- Compile statically with musl:) Tj ET
+BT /F1 9.0 Tf 50.00 588.00 Td (musl-gcc -O2 -Wall -Wextra -std=c11 -static -o txt2pdf txt2pdf.c) Tj ET
+BT /F1 9.0 Tf 50.00 564.00 Td (- Run:) Tj ET
+BT /F1 9.0 Tf 50.00 552.00 Td (./txt2pdf readme.txt readme.pdf) Tj ET
+BT /F1 9.0 Tf 50.00 528.00 Td (- Run with debug diagnostics:) Tj ET
+BT /F1 9.0 Tf 50.00 516.00 Td (./txt2pdf --debug readme.txt readme.pdf) Tj ET
+BT /F1 9.0 Tf 50.00 492.00 Td (==============================================================================) Tj ET
+BT /F1 9.0 Tf 50.00 480.00 Td ([TOC] TABLE OF CONTENTS) Tj ET
+BT /F1 9.0 Tf 50.00 468.00 Td (==============================================================================) Tj ET
+BT /F1 9.0 Tf 50.00 456.00 Td (1.  what is txt2pdf?) Tj ET
+BT /F1 9.0 Tf 50.00 444.00 Td (2.  updated parser rules) Tj ET
+BT /F1 9.0 Tf 50.00 432.00 Td (3.  table of contents rules) Tj ET
+BT /F1 9.0 Tf 50.00 420.00 Td (4.  usage and debug mode) Tj ET
+BT /F1 9.0 Tf 50.00 408.00 Td (5.  minimal working structure) Tj ET
+BT /F1 9.0 Tf 50.00 396.00 Td (6.  pdf internals) Tj ET
+BT /F1 9.0 Tf 50.00 384.00 Td (7.  project structure) Tj ET
+BT /F1 9.0 Tf 50.00 372.00 Td (8.  building and static cookbook) Tj ET
+BT /F1 9.0 Tf 50.00 360.00 Td (9.  known limitations) Tj ET
+BT /F1 9.0 Tf 50.00 348.00 Td (10. troubleshooting) Tj ET
+BT /F1 9.0 Tf 50.00 336.00 Td (11. design philosophy) Tj ET
+BT /F1 9.0 Tf 50.00 324.00 Td (12. license and credits) Tj ET
+BT /F1 9.0 Tf 50.00 300.00 Td (==============================================================================) Tj ET
+BT /F1 9.0 Tf 50.00 288.00 Td (1. WHAT IS TXT2PDF?) Tj ET
+BT /F1 9.0 Tf 50.00 276.00 Td (==============================================================================) Tj ET
+BT /F1 9.0 Tf 50.00 264.00 Td (txt2pdf is a zero-dependency command-line utility that converts plain text) Tj ET
+BT /F1 9.0 Tf 50.00 252.00 Td (files into structured PDF 1.4 documents.) Tj ET
+BT /F1 9.0 Tf 50.00 228.00 Td (Unlike Pandoc, wkhtmltopdf, or Python-based converters that require hundreds) Tj ET
+BT /F1 9.0 Tf 50.00 216.00 Td (of megabytes of runtime dependencies, txt2pdf is a small static binary.) Tj ET
+BT /F1 9.0 Tf 50.00 192.00 Td (It parses text, calculates page breaks, generates PDF objects, and writes) Tj ET
+BT /F1 9.0 Tf 50.00 180.00 Td (the final binary stream directly to disk using only the C standard library.) Tj ET
+BT /F1 9.0 Tf 50.00 156.00 Td (It is designed for environments where installing dependencies is impossible,) Tj ET
+BT /F1 9.0 Tf 50.00 144.00 Td (unwanted, or where the network is down.) Tj ET
+BT /F1 9.0 Tf 50.00 120.00 Td (==============================================================================) Tj ET
+BT /F1 9.0 Tf 50.00 108.00 Td (2. UPDATED PARSER RULES) Tj ET
+BT /F1 9.0 Tf 50.00 96.00 Td (==============================================================================) Tj ET
+BT /F1 9.0 Tf 50.00 84.00 Td (The parser creates PDF bookmarks only for lines that are real section) Tj ET
+BT /F1 9.0 Tf 50.00 72.00 Td (headers.) Tj ET
+endstream
+endobj
+11 0 obj
+<< /Length 3568 >>
+stream
+BT /F1 9.0 Tf 50.00 780.00 Td (A line is considered a section header only if all of these conditions are) Tj ET
+BT /F1 9.0 Tf 50.00 768.00 Td (true:) Tj ET
+BT /F1 9.0 Tf 50.00 744.00 Td (- It starts with a digit, optionally followed by letters, then a dot.) Tj ET
+BT /F1 9.0 Tf 50.00 732.00 Td (- The title text after the dot contains only uppercase letters.) Tj ET
+BT /F1 9.0 Tf 50.00 720.00 Td (- The line is surrounded by separator lines made mostly of '=' characters.) Tj ET
+BT /F1 9.0 Tf 50.00 708.00 Td (- The line is not inside a contents block.) Tj ET
+BT /F1 9.0 Tf 50.00 684.00 Td (Valid section shape:) Tj ET
+BT /F1 9.0 Tf 50.00 660.00 Td (- separator line) Tj ET
+BT /F1 9.0 Tf 50.00 648.00 Td (- uppercase numbered title) Tj ET
+BT /F1 9.0 Tf 50.00 636.00 Td (- separator line) Tj ET
+BT /F1 9.0 Tf 50.00 612.00 Td (Rejected lines:) Tj ET
+BT /F1 9.0 Tf 50.00 588.00 Td (- numbered titles containing lowercase letters) Tj ET
+BT /F1 9.0 Tf 50.00 576.00 Td (- numbered titles used as examples inside normal paragraphs) Tj ET
+BT /F1 9.0 Tf 50.00 564.00 Td (- numbered titles not surrounded by separator lines) Tj ET
+BT /F1 9.0 Tf 50.00 552.00 Td (- numbered titles inside the contents block) Tj ET
+BT /F1 9.0 Tf 50.00 528.00 Td (This makes the parser much safer for manuals that contain examples.) Tj ET
+BT /F1 9.0 Tf 50.00 504.00 Td (==============================================================================) Tj ET
+BT /F1 9.0 Tf 50.00 492.00 Td (3. TABLE OF CONTENTS RULES ) Tj ET
+BT /F1 9.0 Tf 50.00 480.00 Td (==============================================================================) Tj ET
+BT /F1 9.0 Tf 50.00 468.00 Td (Internal links are created only from contents blocks.) Tj ET
+BT /F1 9.0 Tf 50.00 444.00 Td (A contents block is detected when:) Tj ET
+BT /F1 9.0 Tf 50.00 420.00 Td (- a line contains the token "[TOC]" \(e.g., "[TOC]" or "[TOC] TABLE OF CONTENTS"\)) Tj ET
+BT /F1 9.0 Tf 50.00 408.00 Td (- the next non-blank line is a separator line) Tj ET
+BT /F1 9.0 Tf 50.00 396.00 Td (- the block ends at the next separator line) Tj ET
+BT /F1 9.0 Tf 50.00 372.00 Td (Rules for entries:) Tj ET
+BT /F1 9.0 Tf 50.00 348.00 Td (- entries must be numbered lines) Tj ET
+BT /F1 9.0 Tf 50.00 336.00 Td (- lowercase entries are recommended) Tj ET
+BT /F1 9.0 Tf 50.00 324.00 Td (- entries are not converted into bookmarks) Tj ET
+BT /F1 9.0 Tf 50.00 312.00 Td (- entries are linked to the matching section by number or title) Tj ET
+BT /F1 9.0 Tf 50.00 300.00 Td (- uppercase entries inside the contents block are also ignored as bookmarks) Tj ET
+BT /F1 9.0 Tf 50.00 276.00 Td (This means the old duplicate-bookmark problem is largely eliminated by the) Tj ET
+BT /F1 9.0 Tf 50.00 264.00 Td (parser itself.) Tj ET
+BT /F1 9.0 Tf 50.00 240.00 Td (==============================================================================) Tj ET
+BT /F1 9.0 Tf 50.00 228.00 Td (4. USAGE AND DEBUG MODE) Tj ET
+BT /F1 9.0 Tf 50.00 216.00 Td (==============================================================================) Tj ET
+BT /F1 9.0 Tf 50.00 204.00 Td (Basic usage:) Tj ET
+BT /F1 9.0 Tf 50.00 192.00 Td (./txt2pdf input.txt output.pdf) Tj ET
+BT /F1 9.0 Tf 50.00 168.00 Td (Debug usage:) Tj ET
+BT /F1 9.0 Tf 50.00 156.00 Td (./txt2pdf --debug input.txt output.pdf) Tj ET
+BT /F1 9.0 Tf 50.00 132.00 Td (Debug mode prints diagnostics to stderr.) Tj ET
+BT /F1 9.0 Tf 50.00 108.00 Td (It reports:) Tj ET
+BT /F1 9.0 Tf 50.00 84.00 Td (- detected encoding \(UTF-8 vs Latin-1/ISO-8859-1\)) Tj ET
+BT /F1 9.0 Tf 50.00 72.00 Td (- lines marked as part of a contents block) Tj ET
+endstream
+endobj
+12 0 obj
+<< /Length 4103 >>
+stream
+BT /F1 9.0 Tf 50.00 792.00 Td (- detected section headers) Tj ET
+BT /F1 9.0 Tf 50.00 780.00 Td (- skipped uppercase numbered lines) Tj ET
+BT /F1 9.0 Tf 50.00 768.00 Td (- detected internal links) Tj ET
+BT /F1 9.0 Tf 50.00 756.00 Td (- destination page for each section and link) Tj ET
+BT /F1 9.0 Tf 50.00 732.00 Td (Use debug mode when:) Tj ET
+BT /F1 9.0 Tf 50.00 720.00 Td (- a bookmark is missing) Tj ET
+BT /F1 9.0 Tf 50.00 708.00 Td (- too many bookmarks appear) Tj ET
+BT /F1 9.0 Tf 50.00 696.00 Td (- a contents entry does not link anywhere) Tj ET
+BT /F1 9.0 Tf 50.00 684.00 Td (- you are adapting a new readme to the espartan format) Tj ET
+BT /F1 9.0 Tf 50.00 660.00 Td (==============================================================================) Tj ET
+BT /F1 9.0 Tf 50.00 648.00 Td (5. MINIMAL WORKING STRUCTURE) Tj ET
+BT /F1 9.0 Tf 50.00 636.00 Td (==============================================================================) Tj ET
+BT /F1 9.0 Tf 50.00 624.00 Td (A minimal compatible document needs three things:) Tj ET
+BT /F1 9.0 Tf 50.00 612.00 Td (- a contents block starting with the [TOC] token) Tj ET
+BT /F1 9.0 Tf 50.00 600.00 Td (- lowercase or mixed-case contents entries) Tj ET
+BT /F1 9.0 Tf 50.00 588.00 Td (- uppercase section headers surrounded by separator lines) Tj ET
+BT /F1 9.0 Tf 50.00 564.00 Td (Recommended structure:) Tj ET
+BT /F1 9.0 Tf 50.00 552.00 Td (- write the contents title line containing [TOC] \(e.g., "[TOC] TABLE OF CONTENTS"\)) Tj ET
+BT /F1 9.0 Tf 50.00 540.00 Td (- write a separator line) Tj ET
+BT /F1 9.0 Tf 50.00 528.00 Td (- write entries such as "1. introduction" and "2. conclusion") Tj ET
+BT /F1 9.0 Tf 50.00 516.00 Td (- write a separator line) Tj ET
+BT /F1 9.0 Tf 50.00 504.00 Td (- for each section, write a separator line) Tj ET
+BT /F1 9.0 Tf 50.00 492.00 Td (- write the uppercase header, for example "1. INTRODUCTION") Tj ET
+BT /F1 9.0 Tf 50.00 480.00 Td (- write another separator line) Tj ET
+BT /F1 9.0 Tf 50.00 468.00 Td (- write the section body) Tj ET
+BT /F1 9.0 Tf 50.00 444.00 Td (Important:) Tj ET
+BT /F1 9.0 Tf 50.00 432.00 Td (Do not wrap example headers with separator lines unless you want them to) Tj ET
+BT /F1 9.0 Tf 50.00 420.00 Td (become real bookmarks.) Tj ET
+BT /F1 9.0 Tf 50.00 396.00 Td (==============================================================================) Tj ET
+BT /F1 9.0 Tf 50.00 384.00 Td (6. PDF INTERNALS) Tj ET
+BT /F1 9.0 Tf 50.00 372.00 Td (==============================================================================) Tj ET
+BT /F1 9.0 Tf 50.00 360.00 Td (txt2pdf generates a valid PDF 1.4 structure from scratch.) Tj ET
+BT /F1 9.0 Tf 50.00 336.00 Td (Catalog and Pages:) Tj ET
+BT /F1 9.0 Tf 50.00 324.00 Td (Calculates A4 dimensions, applies margins, wraps text using Courier 9pt) Tj ET
+BT /F1 9.0 Tf 50.00 312.00 Td (font with 12pt leading.) Tj ET
+BT /F1 9.0 Tf 50.00 288.00 Td (Encoding & Smart Decoder:) Tj ET
+BT /F1 9.0 Tf 50.00 276.00 Td (Auto-detects UTF-8 vs Latin-1. If UTF-8 is detected, a smart decoder ) Tj ET
+BT /F1 9.0 Tf 50.00 264.00 Td (translates multi-byte sequences to WinAnsiEncoding on the fly, ensuring ) Tj ET
+BT /F1 9.0 Tf 50.00 252.00 Td (perfect rendering of accents \(·ÈÌÛ˙\), Ò, ¸, and their uppercase variants.) Tj ET
+BT /F1 9.0 Tf 50.00 228.00 Td (Outlines:) Tj ET
+BT /F1 9.0 Tf 50.00 216.00 Td (Generates a linked list of PDF Outline objects pointing to the exact XYZ) Tj ET
+BT /F1 9.0 Tf 50.00 204.00 Td (coordinates of each uppercase header.) Tj ET
+BT /F1 9.0 Tf 50.00 180.00 Td (Annotations:) Tj ET
+BT /F1 9.0 Tf 50.00 168.00 Td (Scans contents blocks and injects link annotations for each entry matching) Tj ET
+BT /F1 9.0 Tf 50.00 156.00 Td (a real section.) Tj ET
+BT /F1 9.0 Tf 50.00 132.00 Td (Cross-Reference Table:) Tj ET
+BT /F1 9.0 Tf 50.00 120.00 Td (Calculates byte offsets for every object and writes a compliant xref table) Tj ET
+BT /F1 9.0 Tf 50.00 108.00 Td (and trailer.) Tj ET
+BT /F1 9.0 Tf 50.00 84.00 Td (==============================================================================) Tj ET
+BT /F1 9.0 Tf 50.00 72.00 Td (7. PROJECT STRUCTURE) Tj ET
+endstream
+endobj
+13 0 obj
+<< /Length 3936 >>
+stream
+BT /F1 9.0 Tf 50.00 792.00 Td (==============================================================================) Tj ET
+BT /F1 9.0 Tf 50.00 780.00 Td (The txt2pdf codebase follows a single-file architecture.) Tj ET
+BT /F1 9.0 Tf 50.00 756.00 Td (Typical layout:) Tj ET
+BT /F1 9.0 Tf 50.00 744.00 Td (- txt2pdf.c) Tj ET
+BT /F1 9.0 Tf 50.00 732.00 Td (- Makefile, optional) Tj ET
+BT /F1 9.0 Tf 50.00 720.00 Td (- readme.txt, optional) Tj ET
+BT /F1 9.0 Tf 50.00 696.00 Td (The main C file contains:) Tj ET
+BT /F1 9.0 Tf 50.00 684.00 Td (- argument parsing) Tj ET
+BT /F1 9.0 Tf 50.00 672.00 Td (- encoding detection) Tj ET
+BT /F1 9.0 Tf 50.00 660.00 Td (- text parsing) Tj ET
+BT /F1 9.0 Tf 50.00 648.00 Td (- header detection) Tj ET
+BT /F1 9.0 Tf 50.00 636.00 Td (- contents detection) Tj ET
+BT /F1 9.0 Tf 50.00 624.00 Td (- page break calculation) Tj ET
+BT /F1 9.0 Tf 50.00 612.00 Td (- PDF object generation) Tj ET
+BT /F1 9.0 Tf 50.00 600.00 Td (- binary stream writing) Tj ET
+BT /F1 9.0 Tf 50.00 576.00 Td (The tool is intentionally small and auditable.) Tj ET
+BT /F1 9.0 Tf 50.00 552.00 Td (==============================================================================) Tj ET
+BT /F1 9.0 Tf 50.00 540.00 Td (8. BUILDING AND STATIC COOKBOOK) Tj ET
+BT /F1 9.0 Tf 50.00 528.00 Td (==============================================================================) Tj ET
+BT /F1 9.0 Tf 50.00 516.00 Td (Dynamic build:) Tj ET
+BT /F1 9.0 Tf 50.00 504.00 Td (gcc -O2 -Wall -Wextra -std=c11 -o txt2pdf txt2pdf.c) Tj ET
+BT /F1 9.0 Tf 50.00 492.00 Td (Static musl build:) Tj ET
+BT /F1 9.0 Tf 50.00 480.00 Td (musl-gcc -O2 -Wall -Wextra -std=c11 -static -o txt2pdf txt2pdf.c) Tj ET
+BT /F1 9.0 Tf 50.00 456.00 Td (Why musl?) Tj ET
+BT /F1 9.0 Tf 50.00 444.00 Td (glibc static binaries are often much larger due to NSS and locale data.) Tj ET
+BT /F1 9.0 Tf 50.00 432.00 Td (musl provides a clean, minimal libc that results in a tiny, fully) Tj ET
+BT /F1 9.0 Tf 50.00 420.00 Td (self-contained executable.) Tj ET
+BT /F1 9.0 Tf 50.00 396.00 Td (Verify static build:) Tj ET
+BT /F1 9.0 Tf 50.00 384.00 Td (file txt2pdf) Tj ET
+BT /F1 9.0 Tf 50.00 372.00 Td (ldd txt2pdf) Tj ET
+BT /F1 9.0 Tf 50.00 348.00 Td (Expected:) Tj ET
+BT /F1 9.0 Tf 50.00 336.00 Td (- file reports statically linked) Tj ET
+BT /F1 9.0 Tf 50.00 324.00 Td (- ldd says it is not a dynamic executable) Tj ET
+BT /F1 9.0 Tf 50.00 300.00 Td (==============================================================================) Tj ET
+BT /F1 9.0 Tf 50.00 288.00 Td (9. KNOWN LIMITATIONS) Tj ET
+BT /F1 9.0 Tf 50.00 276.00 Td (==============================================================================) Tj ET
+BT /F1 9.0 Tf 50.00 264.00 Td (- Font is hardcoded to Courier.) Tj ET
+BT /F1 9.0 Tf 50.00 252.00 Td (- WinAnsiEncoding only \(UTF-8 is dynamically translated to WinAnsi\).) Tj ET
+BT /F1 9.0 Tf 50.00 240.00 Td (- Characters outside WinAnsi are replaced with '?'.) Tj ET
+BT /F1 9.0 Tf 50.00 228.00 Td (- No images or vector graphics.) Tj ET
+BT /F1 9.0 Tf 50.00 216.00 Td (- No external URL hyperlinks.) Tj ET
+BT /F1 9.0 Tf 50.00 204.00 Td (- No custom page sizes.) Tj ET
+BT /F1 9.0 Tf 50.00 192.00 Td (- No custom margins.) Tj ET
+BT /F1 9.0 Tf 50.00 180.00 Td (- No multi-column layout.) Tj ET
+BT /F1 9.0 Tf 50.00 168.00 Td (- Section headers must be fenced by separator lines.) Tj ET
+BT /F1 9.0 Tf 50.00 156.00 Td (- Internal links are only generated from contents blocks.) Tj ET
+BT /F1 9.0 Tf 50.00 132.00 Td (==============================================================================) Tj ET
+BT /F1 9.0 Tf 50.00 120.00 Td (10. TROUBLESHOOTING) Tj ET
+BT /F1 9.0 Tf 50.00 108.00 Td (==============================================================================) Tj ET
+BT /F1 9.0 Tf 50.00 96.00 Td (Missing bookmarks:) Tj ET
+BT /F1 9.0 Tf 50.00 84.00 Td (- The header contains lowercase letters.) Tj ET
+BT /F1 9.0 Tf 50.00 72.00 Td (- The header is not surrounded by separator lines.) Tj ET
+endstream
+endobj
+14 0 obj
+<< /Length 3560 >>
+stream
+BT /F1 9.0 Tf 50.00 792.00 Td (- The header is accidentally inside a contents block.) Tj ET
+BT /F1 9.0 Tf 50.00 768.00 Td (Duplicate bookmarks:) Tj ET
+BT /F1 9.0 Tf 50.00 756.00 Td (- Old documents may have uppercase contents entries.) Tj ET
+BT /F1 9.0 Tf 50.00 744.00 Td (- The updated parser ignores contents entries as sections.) Tj ET
+BT /F1 9.0 Tf 50.00 732.00 Td (- If duplicates persist, run with --debug and inspect skipped lines.) Tj ET
+BT /F1 9.0 Tf 50.00 708.00 Td (Missing links:) Tj ET
+BT /F1 9.0 Tf 50.00 696.00 Td (- The entry is not inside a detected contents block.) Tj ET
+BT /F1 9.0 Tf 50.00 684.00 Td (- The entry number does not match any section.) Tj ET
+BT /F1 9.0 Tf 50.00 672.00 Td (- The entry title does not match any section title.) Tj ET
+BT /F1 9.0 Tf 50.00 648.00 Td (Extra bookmarks:) Tj ET
+BT /F1 9.0 Tf 50.00 636.00 Td (- An example header is surrounded by separator lines.) Tj ET
+BT /F1 9.0 Tf 50.00 624.00 Td (- Remove the separators around examples or rewrite the example line.) Tj ET
+BT /F1 9.0 Tf 50.00 600.00 Td (Garbled characters \(accents, Ò\):) Tj ET
+BT /F1 9.0 Tf 50.00 588.00 Td (- Ensure your text editor saves the file in UTF-8.) Tj ET
+BT /F1 9.0 Tf 50.00 576.00 Td (- Run with --debug to verify the detected encoding.) Tj ET
+BT /F1 9.0 Tf 50.00 552.00 Td (Debug output is the fastest way to diagnose the problem.) Tj ET
+BT /F1 9.0 Tf 50.00 528.00 Td (==============================================================================) Tj ET
+BT /F1 9.0 Tf 50.00 516.00 Td (11. DESIGN PHILOSOPHY) Tj ET
+BT /F1 9.0 Tf 50.00 504.00 Td (==============================================================================) Tj ET
+BT /F1 9.0 Tf 50.00 492.00 Td (Modern software development has forgotten how to build small tools.) Tj ET
+BT /F1 9.0 Tf 50.00 480.00 Td (We wrap simple text transformations in Electron apps, Node.js runtimes,) Tj ET
+BT /F1 9.0 Tf 50.00 468.00 Td (and Docker containers.) Tj ET
+BT /F1 9.0 Tf 50.00 444.00 Td (txt2pdf is a rejection of that bloat.) Tj ET
+BT /F1 9.0 Tf 50.00 420.00 Td (It proves that a fully functional, structured document generator can fit) Tj ET
+BT /F1 9.0 Tf 50.00 408.00 Td (in a tiny static binary, written in pure C11, with zero external) Tj ET
+BT /F1 9.0 Tf 50.00 396.00 Td (dependencies.) Tj ET
+BT /F1 9.0 Tf 50.00 372.00 Td (When the cloud goes down, and the package managers fail to resolve,) Tj ET
+BT /F1 9.0 Tf 50.00 360.00 Td (the espartan tool remains.) Tj ET
+BT /F1 9.0 Tf 50.00 336.00 Td ("Code is neither created nor destroyed; it is distilled.") Tj ET
+BT /F1 9.0 Tf 50.00 312.00 Td (==============================================================================) Tj ET
+BT /F1 9.0 Tf 50.00 300.00 Td (12. LICENSE AND CREDITS) Tj ET
+BT /F1 9.0 Tf 50.00 288.00 Td (==============================================================================) Tj ET
+BT /F1 9.0 Tf 50.00 276.00 Td (License:) Tj ET
+BT /F1 9.0 Tf 50.00 264.00 Td (GPLv3.) Tj ET
+BT /F1 9.0 Tf 50.00 240.00 Td (Credits:) Tj ET
+BT /F1 9.0 Tf 50.00 228.00 Td (txt2pdf was written as a demonstration of minimalist software design.) Tj ET
+BT /F1 9.0 Tf 50.00 204.00 Td (Inspired by the Unix philosophy: do one thing well.) Tj ET
+BT /F1 9.0 Tf 50.00 180.00 Td (Built with minimalism, on a potato, for potatoes.) Tj ET
+BT /F1 9.0 Tf 50.00 156.00 Td (==============================================================================) Tj ET
+BT /F1 9.0 Tf 50.00 144.00 Td (END OF DOCUMENTATION) Tj ET
+BT /F1 9.0 Tf 50.00 132.00 Td (==============================================================================) Tj ET
+endstream
+endobj
+15 0 obj
+<< /Title (1. WHAT IS TXT2PDF?) /Parent 2 0 R /Next 16 0 R /Dest [5 0 R /XYZ 50.00 298.00 null] >>
+endobj
+16 0 obj
+<< /Title (2. UPDATED PARSER RULES) /Parent 2 0 R /Prev 15 0 R /Next 17 0 R /Dest [5 0 R /XYZ 50.00 118.00 null] >>
+endobj
+17 0 obj
+<< /Title (3. TABLE OF CONTENTS RULES) /Parent 2 0 R /Prev 16 0 R /Next 18 0 R /Dest [6 0 R /XYZ 50.00 502.00 null] >>
+endobj
+18 0 obj
+<< /Title (4. USAGE AND DEBUG MODE) /Parent 2 0 R /Prev 17 0 R /Next 19 0 R /Dest [6 0 R /XYZ 50.00 238.00 null] >>
+endobj
+19 0 obj
+<< /Title (5. MINIMAL WORKING STRUCTURE) /Parent 2 0 R /Prev 18 0 R /Next 20 0 R /Dest [7 0 R /XYZ 50.00 658.00 null] >>
+endobj
+20 0 obj
+<< /Title (6. PDF INTERNALS) /Parent 2 0 R /Prev 19 0 R /Next 21 0 R /Dest [7 0 R /XYZ 50.00 394.00 null] >>
+endobj
+21 0 obj
+<< /Title (7. PROJECT STRUCTURE) /Parent 2 0 R /Prev 20 0 R /Next 22 0 R /Dest [7 0 R /XYZ 50.00 82.00 null] >>
+endobj
+22 0 obj
+<< /Title (8. BUILDING AND STATIC COOKBOOK) /Parent 2 0 R /Prev 21 0 R /Next 23 0 R /Dest [8 0 R /XYZ 50.00 550.00 null] >>
+endobj
+23 0 obj
+<< /Title (9. KNOWN LIMITATIONS) /Parent 2 0 R /Prev 22 0 R /Next 24 0 R /Dest [8 0 R /XYZ 50.00 298.00 null] >>
+endobj
+24 0 obj
+<< /Title (10. TROUBLESHOOTING) /Parent 2 0 R /Prev 23 0 R /Next 25 0 R /Dest [8 0 R /XYZ 50.00 130.00 null] >>
+endobj
+25 0 obj
+<< /Title (11. DESIGN PHILOSOPHY) /Parent 2 0 R /Prev 24 0 R /Next 26 0 R /Dest [9 0 R /XYZ 50.00 526.00 null] >>
+endobj
+26 0 obj
+<< /Title (12. LICENSE AND CREDITS) /Parent 2 0 R /Prev 25 0 R /Dest [9 0 R /XYZ 50.00 310.00 null] >>
+endobj
+xref
+0 27
+0000000000 65535 f 
+0000000015 00000 n 
+0000000103 00000 n 
+0000000177 00000 n 
+0000000258 00000 n 
+0000000353 00000 n 
+0000001953 00000 n 
+0000002080 00000 n 
+0000002207 00000 n 
+0000002334 00000 n 
+0000002461 00000 n 
+0000006864 00000 n 
+0000010484 00000 n 
+0000014639 00000 n 
+0000018627 00000 n 
+0000022239 00000 n 
+0000022354 00000 n 
+0000022486 00000 n 
+0000022621 00000 n 
+0000022753 00000 n 
+0000022890 00000 n 
+0000023015 00000 n 
+0000023143 00000 n 
+0000023283 00000 n 
+0000023412 00000 n 
+0000023540 00000 n 
+0000023670 00000 n 
+trailer
+<< /Size 27 /Root 1 0 R >>
+startxref
+23789
+%%EOF

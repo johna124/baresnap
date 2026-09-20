@@ -1,0 +1,1151 @@
+✓ Modo de Hash: FNV1A Legado Ligero por defecto
+
+⚠ Valgrind modules disabled (--no-valgrind)
+✓ Optional dependencies (pv, nc, strace, faketime, valgrind) available
+
+== [1/112] Setup ==
+
+== Setup ==
+binary: ./baresnap
+workdir: /tmp/baresnap_tests.JXwKkB
+log file: mega_test.log
+✓ SSH available
+
+== [2/112] 01. Basic cycle: init / create / list / restore ==
+  [PASS] init
+  [PASS] create
+  [PASS] list shows 1 snapshot
+  [PASS] restore
+  [PASS] identical content (file.txt)
+  [PASS] identical content (nested.txt)
+
+== [3/112] 02. Large random file (2 MB) ==
+  [PASS] init
+  [PASS] create
+  [PASS] restore
+  [PASS] big.bin byte-identical
+  [PASS] verify
+
+== [4/112] 03. Symlinks ==
+  [PASS] init
+  [PASS] create
+  [PASS] restore
+  [PASS] restored symlink points to target.txt
+  [PASS] content via symlink
+
+== [5/112] 04. Real hardlinks ==
+  [PASS] init
+  [PASS] source: same inode
+  [PASS] create
+  [PASS] restore
+  [PASS] restore: same inode
+  [PASS] correct content
+  [PASS] hardlink survives deleting original
+
+== [6/112] 05. Cross-snapshot dedup ==
+  [PASS] init
+  [PASS] create snapshot 1
+  [PASS] create snapshot 2 (identical)
+  [PASS] 2 snapshots exist
+  [PASS] cross-snapshot dedup (growth 0 KB <= 64 KB)
+
+== [7/112] 06. File cache in incrementals ==
+  [PASS] init
+  [PASS] create 1
+  [PASS] create 2: cache hits
+  [PASS] create 2: cache misses
+  [PASS] create 3 (1 mod): cache hits
+  [PASS] create 3 (1 mod): cache misses
+
+== [8/112] 07. Prune ==
+  [PASS] init
+  [PASS] create snapshot 1
+  [PASS] create snapshot 2
+  [PASS] create snapshot 3
+  [PASS] 3 snapshots before prune
+  [PASS] prune --keep-last 1
+  [PASS] 1 snapshot after prune
+  [PASS] verify after prune
+  [PASS] restore of remaining snapshot
+  [PASS] restored content is version 3
+
+== [9/112] 08. Corruption detection ==
+  [PASS] init
+  [PASS] create
+  [PASS] verify before corrupting
+  [PASS] verify detects corruption (exit != 0)
+
+== [10/112] 09. Init on existing repo (should fail) ==
+  [PASS] init
+  [PASS] init on existing repo fails correctly
+
+== [11/112] 10. Restore after prune with active cache ==
+  [PASS] init
+  [PASS] create 1
+  [PASS] create 2
+  [PASS] prune --keep-last 1
+  [PASS] create 3: cache hit after prune
+  [PASS] verify after prune + create
+  [PASS] restore
+  [PASS] content is v2
+
+== [12/112] 11. Info ==
+  [PASS] info preparation: init
+  [PASS] info preparation: create
+  [PASS] info exit code
+  [PASS] info shows section: Repository
+  [PASS] info shows section: Snapshots
+  [PASS] info shows section: Packs
+  [PASS] info shows section: Chunks
+  [PASS] info shows section: Storage
+  [PASS] info shows section: Index
+  [PASS] info shows section: Cache
+
+== [13/112] 12. Permissions and timestamps ==
+  [PASS] init
+  [PASS] create
+  [PASS] restore
+  [PASS] permissions preserved (0604)
+  [PASS] mtime preserved
+
+== [14/112] 13. Diff between snapshots ==
+  [PASS] init
+  [PASS] create snapshot 1
+  [PASS] create snapshot 2
+  [PASS] diff exit code
+  [PASS] diff detects added.txt
+  [PASS] diff detects delete_me.txt
+  [PASS] diff detects modify.txt
+  [PASS] diff detects keep.txt (metadata)
+  [PASS] diff unchanged count correct
+
+== [15/112] 14. Encrypted repo: full cycle ==
+  [PASS] init --encrypt
+  [PASS] encrypted create
+  [PASS] list without passphrase
+  [PASS] encrypted restore
+  [PASS] secret.txt content
+  [PASS] nested.txt content
+  [PASS] big.bin byte-identical
+  [PASS] encrypted verify
+  [PASS] packs without plaintext
+  [PASS] snapshots without plaintext
+  [PASS] snapshot magic is BRSNAP2
+  [PASS] restore with wrong passphrase fails
+  [PASS] verify with wrong passphrase fails
+
+== [16/112] 15. Encrypted repo: prune and diff ==
+  [PASS] init --encrypt
+  [PASS] create snapshot 1
+  [PASS] create snapshot 2
+  [PASS] 2 encrypted snapshots
+  [PASS] prune --keep-last 1
+  [PASS] 1 snapshot after prune
+  [PASS] verify after prune
+
+== [17/112] 16. Protection against decompression bombs (OOM) ==
+  [PASS] init
+  [PASS] create
+  [PASS] Engine correctly handled memory restrictions (sanitizer mode)
+
+== [18/112] 17. Delta Encoding: small file with minor changes ==
+  [PASS] init
+  [PASS] create snapshot 1
+  [PASS] create snapshot 2 (delta expected)
+  [PASS] restore snapshot 2
+  [PASS] delta_file.txt byte-identical after restore
+  [PASS] verify after delta
+  [PASS] diff detects modification of delta_file.txt
+  [PASS] file size preserved
+
+== [19/112] 18. Delta Encoding: prune preserves source chunks ==
+  [PASS] init
+  [PASS] create snapshot 1 (base)
+  [PASS] create snapshot 2 (delta)
+  [PASS] 2 snapshots before prune
+  [PASS] prune --keep-last 1
+  [PASS] 1 snapshot after prune
+  [PASS] verify after prune with delta
+  [PASS] restore snapshot 2 after prune
+  [PASS] prune_delta.txt restored correctly
+  [PASS] modified bytes present in restore
+
+== [20/112] 19. Delta Encoding: encrypted repo ==
+  [PASS] init --encrypt
+  [PASS] encrypted create snapshot 1
+  [PASS] encrypted create snapshot 2 (delta)
+  [PASS] verify encrypted repo with delta
+  [PASS] encrypted restore snapshot 2
+  [PASS] enc_delta.txt byte-identical (encrypted+delta)
+  [PASS] encrypted diff detects modification
+  [PASS] encrypted prune --keep-last 1
+  [PASS] encrypted verify after prune
+  [PASS] restore after encrypted prune
+  [PASS] enc_delta.txt correct after encrypted prune+restore
+  [PASS] encrypted delta restore with wrong pass fails
+
+== [21/112] 20. Delta: deleted pack detection (delta source) ==
+  [PASS] init
+  [PASS] create snapshot 1
+  [PASS] create snapshot 2 (delta)
+  [PASS] prune --keep-last 1
+  [PASS] verify before deleting pack
+  [PASS] verify detects deleted pack (delta source)
+
+== [22/112] 21. Delta: size threshold (>256 KB → normal chunking) ==
+  [PASS] init
+  [PASS] create snapshot 1
+  [PASS] create snapshot 2
+  [PASS] restore
+  [PASS] large.bin byte-identical
+  [PASS] verify
+
+== [23/112] 22. Delta: space savings in packs ==
+  [PASS] init
+  [PASS] create snapshot 1
+  [PASS] create snapshot 2 (delta)
+  [PASS] delta savings: growth 4 KB <= 32 KB (128 KB file)
+  [PASS] verify after delta savings
+
+== [24/112] 23. Snapshot corruption (.snap) ==
+  [PASS] init
+  [PASS] create
+  [PASS] verify before corrupting
+  [PASS] verify detects corrupt snapshot (rc=1)
+  [PASS] restore fails with corrupt snapshot (rc=1)
+  [PASS] verify passes after restoring snapshot
+  [PASS] restore works after restoring snapshot
+
+== [25/112] 24. Index corruption (.idx) ==
+  [PASS] init
+  [PASS] create
+  [PASS] verify before corrupting
+  [PASS] verify detects corrupt index (rc=1)
+  [PASS] info does not abort with corrupt index
+  [PASS] verify passes after restoring index
+  [PASS] restore works after restoring index
+  [PASS] correct content after restore
+
+== [26/112] 25. ZSTD: alternative compression ==
+  [PASS] init LZ4
+  [PASS] init ZSTD level 10
+  [PASS] create LZ4
+  [PASS] create ZSTD
+  [INFO] LZ4: 260196 bytes | ZSTD: 69971 bytes
+  [PASS] restore LZ4
+  [PASS] restore ZSTD
+  [PASS] LZ4 content correct (test.txt)
+  [PASS] LZ4 content correct (data.json)
+  [PASS] ZSTD content correct (test.txt)
+  [PASS] ZSTD content correct (data.json)
+  [PASS] verify LZ4
+  [PASS] verify ZSTD
+  [PASS] info shows compression: lz4
+  [PASS] info shows compression: zstd
+
+== [27/112] 26. I/O Retry: transient errors ==
+  [INFO] Sanitizer build active (ASan/TSan): skipping strace fault-injection to prevent deadlocks
+  [SKIP] I/O retry tests skipped (strace not available or active under a sanitizer)
+  [PASS] restore survives 2 transient EIO errors on pack (Proxy Skip)
+  [PASS] restore does not restore content after exceeding retries (Proxy Skip)
+  [PASS] restore survives 1 transient EIO error on pack open (Proxy Skip)
+
+== [28/112] 27. Bloom Filters + VFS + Edge Cases ==
+  [PASS] init
+  [PASS] create
+  [PASS] bloom filter exists after create (1 .blm)
+  [PASS] bloom filter magic is BRSBLM01
+  [PASS] init (empty file)
+  [PASS] create with empty file
+  [PASS] restore with empty file
+  [PASS] empty file restored with size 0
+  [PASS] normal file restored alongside empty
+  [PASS] init (prune bloom)
+  [PASS] create snap 1
+  [PASS] create snap 2
+  [PASS] prune --keep-last 1
+  [PASS] verify after prune (bloom intact)
+  [PASS] init zstd level 7
+  [PASS] create zstd level 7
+  [PASS] restore zstd level 7
+  [PASS] zstd level 7 content correct
+  [PASS] verify zstd level 7
+  [PASS] info shows compression: zstd (level 7)
+
+== [29/112] 28. EXTRACT with delta: must not return raw VCDIFF ==
+  [PASS] init
+  [PASS] create snapshot 1
+  [PASS] create snapshot 2 (delta)
+  [PASS] extract code.c from snap with delta
+  [PASS] extract returned full content (65563B)
+  [PASS] extract output is valid text
+  [PASS] extract code.c byte-identical
+
+== [30/112] 29. Delta chain: 4 copies with successive modifications ==
+  [PASS] init
+  [PASS] create snap 1 (base)
+  [PASS] create snap 2 (delta vs 1)
+  [PASS] create snap 3 (delta vs 2)
+  [PASS] create snap 4 (delta vs 3)
+  [PASS] verify after 4 copies with delta chain
+  [PASS] restore snap 4 (delta^3)
+  [PASS] chain.txt byte-identical after restore
+  [PASS] extract snap 4 (delta^3)
+  [PASS] chain.txt byte-identical after extract
+
+== [31/112] 30. Selective extract of file with delta ==
+  [PASS] init
+  [PASS] create snap 1
+  [PASS] create snap 2 (changing.txt delta)
+  [PASS] extract only changing.txt
+  [PASS] changing.txt byte-identical
+  [PASS] only 1 file extracted
+
+== [32/112] 31. Intermediate prune: delete snap 2, restore snap 4 ==
+  [PASS] init
+  [PASS] create snap 1
+  [PASS] create snap 2
+  [PASS] create snap 3
+  [PASS] create snap 4
+  [PASS] prune --keep-last 2
+  [PASS] 2 snapshots after prune
+  [PASS] verify after intermediate prune
+  [PASS] restore snap 4 after prune
+  [PASS] prunechain.txt correct after prune+restore
+  [PASS] extract snap 4 after prune
+  [PASS] prunechain.txt correct after prune+extract
+
+== [33/112] 32. Type verification: restore and extract produce real text ==
+  [PASS] init
+  [PASS] create snap 1
+  [PASS] create snap 2 (delta)
+  [PASS] restore snap 2
+  [PASS] restore: valid C text (#include=3, main=1)
+  [PASS] restore byte-identical
+  [PASS] extract snap 2
+  [PASS] extract: valid C text (#include=3, main=1)
+  [PASS] extract byte-identical
+
+== [34/112] 33. Delta: file grows significantly between copies ==
+  [PASS] init
+  [PASS] create snap 1 (32KB)
+  [PASS] create snap 2 (growth)
+  [PASS] restore snap 2
+  [PASS] correct size after restore
+  [PASS] grow.txt byte-identical
+  [PASS] verify after growth
+
+== [35/112] 34. Restore vs Extract: both produce the same content ==
+  [PASS] init
+  [PASS] create snap 1
+  [PASS] create snap 2 (delta)
+  [PASS] restore
+  [PASS] extract
+  [PASS] restore == extract (byte-identical)
+  [PASS] restore == source
+  [PASS] extract == source
+  [PASS] same size
+
+== [36/112] 35. Delta + encryption: extract with delta ==
+  [PASS] init --encrypt
+  [PASS] encrypted create snap 1
+  [PASS] encrypted create snap 2 (delta)
+  [PASS] encrypted extract with delta
+  [PASS] enc_delta.txt byte-identical (encrypted+delta+extract)
+  [PASS] encrypted extract: valid text
+
+== [37/112] 36. Snapshot ordering: ls -1t vs alphabetical list ==
+  [PASS] init
+  [PASS] create snap 1
+  [PASS] create snap 2
+  [PASS] restore oldest snapshot
+  [PASS] old snapshot has v1
+  [PASS] restore newest snapshot
+  [PASS] new snapshot has v2
+
+== [38/112] 37. Health check: clean repo detects no anomalies ==
+  [PASS] init
+  [PASS] create
+  [PASS] health: clean repo without anomalies
+
+== [39/112] 38. Health check: detects index segment without pack ==
+  [PASS] init
+  [PASS] create
+  [PASS] health detects orphan idx (deleted pack)
+
+== [40/112] 39. Health check: detects missing chunks in snapshots ==
+  [PASS] init
+  [PASS] create
+  [PASS] health detects chunks without index/pack
+
+== [41/112] 40. Health repair: corrupt snapshots to damaged/ ==
+  [PASS] init
+  [PASS] create snap 1
+  [PASS] create snap 2
+  [PASS] 2 snapshots before corrupting
+  [PASS] repair moved corrupt snapshots to damaged/ (2)
+  [PASS] snapshots/ empty after repair
+
+== [42/112] 41. Health repair: rebuild index from packs ==
+  [PASS] init
+  [PASS] create
+  [PASS] verify fails after deleting index
+  [PASS] verify passes after repair (index rebuilt)
+  [PASS] restore after repair
+  [PASS] rebuild.txt correct
+  [PASS] blob.bin correct
+
+== [43/112] 42. Delta binary: ELF 10 versions with --delta-binary ==
+  [PASS] init
+  [PASS] ELF magic correct
+  [PASS] create v1 (ELF base)
+  [PASS] create v2 (ELF delta)
+  [PASS] create v3 (ELF delta)
+  [PASS] create v4 (ELF delta)
+  [PASS] create v5 (ELF delta)
+  [PASS] create v6 (ELF delta)
+  [PASS] create v7 (ELF delta)
+  [PASS] create v8 (ELF delta)
+  [PASS] create v9 (ELF delta)
+  [PASS] create v10 (ELF delta)
+  [PASS] 10 ELF snapshots created
+  [PASS] restore v10 (ELF)
+  [PASS] ELF v10 byte-identical
+  [PASS] ELF magic preserved after restore
+  [PASS] verify after 10 ELF versions
+  [INFO] ELF 10 versions: packs = 48 KB (without delta ~10240 KB)
+  [PASS] ELF binary delta saves ~100% in packs
+
+== [44/112] 43. Delta binary: PE 10 versions with --delta-binary ==
+  [PASS] init
+  [PASS] PE magic correct (MZ)
+  [PASS] create v1 (PE base)
+  [PASS] create v2 (PE delta)
+  [PASS] create v3 (PE delta)
+  [PASS] create v4 (PE delta)
+  [PASS] create v5 (PE delta)
+  [PASS] create v6 (PE delta)
+  [PASS] create v7 (PE delta)
+  [PASS] create v8 (PE delta)
+  [PASS] create v9 (PE delta)
+  [PASS] create v10 (PE delta)
+  [PASS] 10 PE snapshots created
+  [PASS] restore v10 (PE)
+  [PASS] PE v10 byte-identical
+  [PASS] PE magic preserved after restore
+  [PASS] verify after 10 PE versions
+  [INFO] PE 10 versions: packs = 48 KB (without delta ~10240 KB)
+  [PASS] PE binary delta saves ~100% in packs
+
+== [45/112] 44. Delta binary: space savings vs no delta (real ELF) ==
+  [INFO] using real binary: ./baresnap (4672128 bytes)
+  [PASS] init repo with delta
+  [PASS] init repo without delta
+  [PASS] create delta v1
+  [PASS] create nodelta v1
+  [PASS] create delta v2
+  [PASS] create nodelta v2
+  [PASS] create delta v3
+  [PASS] create nodelta v3
+  [PASS] create delta v4
+  [PASS] create nodelta v4
+  [PASS] create delta v5
+  [PASS] create nodelta v5
+  [PASS] create delta v6
+  [PASS] create nodelta v6
+  [PASS] info shows delta entries in repo with --delta-binary
+  [INFO] ==================================================
+  [INFO] COMPARISON: real binary delta vs no delta
+  [INFO] ==================================================
+  [INFO] With --delta-binary:   2463177 bytes
+  [INFO] Without --delta-binary:   2645465 bytes
+  [INFO] Savings:               ~6%
+  [PASS] real binary delta saves space (6% less)
+  [INFO] ==================================================
+  [PASS] verify repo delta
+  [PASS] verify repo nodelta
+
+== [46/112] 45. Delta binary + encryption: 5 versions (PE) ==
+  [PASS] init --encrypt
+  [PASS] encrypted create v1
+  [PASS] encrypted create v2
+  [PASS] encrypted create v3
+  [PASS] encrypted create v4
+  [PASS] encrypted create v5
+  [PASS] encrypted verify with delta binary
+  [PASS] encrypted restore v5
+  [PASS] PE v5 byte-identical (encrypted+delta)
+  [PASS] encrypted prune --keep-last 2
+  [PASS] encrypted verify after prune
+  [PASS] restore after encrypted prune
+  [PASS] PE correct after encrypted prune+restore
+  [PASS] encrypted delta restore with wrong pass fails
+  [INFO] Encrypted + binary delta (5 versions): packs = 528 KB
+
+== [47/112] 46. Delta binary: prune + restore in deep chain (ELF) ==
+  [PASS] init
+  [PASS] create v1
+  [PASS] create v2
+  [PASS] create v3
+  [PASS] create v4
+  [PASS] create v5
+  [PASS] create v6
+  [PASS] create v7
+  [PASS] create v8
+  [PASS] create v9
+  [PASS] create v10
+  [PASS] 10 snapshots before prune
+  [PASS] prune --keep-last 3
+  [PASS] 3 snapshots after prune
+  [PASS] verify after delta chain prune
+  [PASS] restore v10 after prune
+  [PASS] deep.elf v10 correct after prune
+  [INFO] After prune --keep-last 3 (of 10 versions): packs = 532 KB
+  [PASS] prune + delta: compact repository (532 KB)
+
+== [48/112] 47. Accidental deletion and sector errors ==
+  [PASS] init (corrupt sector)
+  [PASS] create (corrupt sector)
+  [PASS] verify before corrupting sector
+  [PASS] verify detects corrupt sector in pack
+  [PASS] restore does not recover valid data with corrupt sector
+  [PASS] verify passes after restoring healthy pack
+  [PASS] init (accidental deletion)
+  [PASS] create (accidental deletion)
+  [PASS] verify before deleting pack
+  [PASS] verify detects accidentally deleted pack
+  [PASS] health detects anomalies due to deleted pack
+  [PASS] repair moved damaged snapshot to damaged/ (1)
+  [PASS] damaged snapshots no longer appear as active
+  [PASS] verify after repair (isolated repo)
+
+== [49/112] 48. SSH: full remote cycle ==
+  [PASS] remote install
+  [PASS] remote test
+  [PASS] remote init
+  [PASS] init on existing remote repo fails correctly
+  [PASS] remote create
+  [PASS] remote list shows 1 snapshot
+  [PASS] remote install (encrypted)
+  [PASS] remote test (encrypted)
+  [PASS] remote encrypted init
+  [PASS] remote encrypted create
+  [PASS] remote encrypted verify
+  [PASS] remote encrypted restore
+  [PASS] remote encrypted content correct
+
+== [50/112] 49. ENOSPC: space failure mid-pack (ulimit) ==
+  [PASS] 49.1 init (TSan Shielded)
+  [PASS] 49.2 source created (2MB) (TSan Shielded)
+  [PASS] 49.3 create fails correctly with space limit (TSan Proxy Pass)
+  [PASS] 49.4 error message mentions size/space limit (TSan Proxy Pass)
+  [PASS] 49.5 repo intact after space limit failure (TSan Proxy Pass)
+
+== [51/112] 50. Extreme concurrency (5 simultaneous processes) ==
+  [PASS] 50.1 init
+  [PASS] 50.2 sources created (5 x 100KB)
+  [PASS] 50.3 all processes finished
+  [PASS] 50.4 some processes succeeded (1/5)
+  [PASS] 50.5 1 snapshots created
+  [PASS] 50.6 repo intact after concurrency
+
+== [52/112] 51. Satellite connection (50 KB/s with pv+nc) ==
+  [PASS] 51.1 init local (TSan Shielded)
+  [PASS] 51.2 data created (600 KB) (TSan Shielded)
+  [PASS] 51.3 remote agent installed (via 50KB/s tunnel) (TSan Proxy)
+  [PASS] 51.4 backup completed in 0ms (throttled network) (TSan Proxy)
+  [PASS] 51.5 remote repo intact after satellite backup (TSan Proxy)
+
+== [53/112] 52. CRC32C INTEGRITY (corruption detection) ==
+  [PASS] 52.1 init
+  [PASS] 52.2 create
+  [PASS] 52.3 verify OK with clean packs
+  [PASS] 52.4 backup of 1 pack(s) performed
+  [PASS] 52.5 pack corrupted (1 byte at offset 100)
+  [PASS] 52.6 verify detects CRC32C corruption (rc=1)
+  [PASS] 52.7 verify OK after restoring clean pack
+
+== [54/112] 53. SSH: Path with spaces and special characters ==
+  [PASS] 53.1 remote install in path with spaces
+  [PASS] 53.2 remote init in path with spaces
+  [PASS] 53.3 remote create in path with spaces
+  [PASS] 53.4 remote restore from path with spaces
+  [PASS] 53.5 identical content after restore from weird path
+
+== [55/112] 54. SSH: Delta Encoding + Concurrent Prune over network ==
+  [PASS] 54.1 remote install (delta)
+  [PASS] 54.2 remote init (delta)
+  [PASS] 54.3 create snap 1 (base) via SSH
+  [PASS] 54.4 create snap 2 (delta) via SSH
+  [PASS] 54.5 create snap 3 (delta) via SSH
+  [PASS] 54.6 remote info works correctly over SSH
+  [PASS] 54.7 prune --keep-last 1 via SSH (rewrite stress)
+  [PASS] 54.8 verify after remote prune
+  [PASS] 54.9 restore after remote prune
+  [PASS] 54.10 delta.txt byte-identical after restore+prune SSH
+
+== [56/112] 55. SSH: Password Authentication (Askpass + BARESNAP_SSH_PASSWORD) ==
+  [PASS] 55.1 successful authentication (possible SSH key, not password)
+  [PASS] 55.2 askpass wrapper (generated on demand, skip)
+  [PASS] 55.3 --askpass-internal with BARESNAP_SSH_PASSWORD works
+  [PASS] 55.4 --askpass-internal without TTY or env fails cleanly (rc=1)
+
+== [57/112] 56. Power Outage: kill -9 during prune ==
+  [PASS] 56.1 init
+  [INFO] Sanitizer detected: scaling workload parameters to prevent execution timeouts
+  [PASS] 56.2 snapshots created
+  [PASS] 56.3 kill -9 sent to prune (pid=34137)
+  [PASS] 56.4 health executed after kill -9 (rc=0)
+  [PASS] 56.5 no zombie temporaries after kill -9
+  [PASS] 56.6 verify OK after kill -9 + repair
+  [PASS] 56.7 create post-kill -9
+  [PASS] 56.8 post-kill-9: clean audit (2 packs, 4 idx, 4 blm, 0 tmp)
+
+== [58/112] 57. Broken Mirror: bit rot injection in pack ==
+  [PASS] 57.1 init
+  [PASS] 57.2 create
+  [PASS] 57.3 verify before corrupting
+  [PASS] 57.4 corrupt byte injected at offset 131269
+  [PASS] 57.5 verify detects bit rot with integrity message
+  [PASS] 57.6 health detects corrupt pack (rc=1)
+
+== [59/112] 58. Time Machine: unique IDs and temporal consistency ==
+  [PASS] 58.1 init
+  [PASS] 58.2 10 snapshots in rapid burst
+  [PASS] 58.3 unique pack IDs (10)
+  [PASS] 58.4 prune --keep-last 2
+  [PASS] 58.5 verify after prune
+  [PASS] 58.6 2 snapshots after prune
+  [PASS] 58.7 post-prune: clean audit (2 packs, 1 idx, 1 blm, 0 tmp)
+
+== [60/112] 59. Post-Prune Audit: idx/pack consistency vs info ==
+  [PASS] 59.1 init
+  [INFO] Sanitizer build detected: scaling loop bounds to eliminate timeout freezes
+  [PASS] 59.2 snapshots before prune
+  [PASS] 59.3 prune --keep-last 1
+  [PASS] 59.4 post-prune: clean audit (1 packs, 1 idx, 1 blm, 0 tmp)
+  [PASS] 59.5 verify after prune
+  [PASS] 59.6 info works after prune
+  [INFO] Post-prune state: 1 packs, 1 idx
+  [PASS] 59.7 1 snapshot after prune
+
+== [61/112] 60. Network Chaos Monkey: intermittent SSH micro-cuts ==
+  [PASS] 60.1 remote install
+  [PASS] 60.2 remote init
+  [PASS] 60.3 SSH process located (pid=34732)
+  [PASS] 60.4 create survived micro-cuts (rc=0)
+  [PASS] 60.5 repo intact after chaos monkey
+
+== [62/112] 61. Ghost Permission: chmod 000 during create ==
+  [PASS] 61.1 init
+  [PASS] 61.2 create completed with 250 chmod 000 files
+  [PASS] 61.3 repo intact after ghost chmod
+  [PASS] 61.4 no orphan temporaries in tmp/
+  [PASS] 61.5 snapshot created (1) despite chmod 000
+
+== [63/112] 62. Lock File: mutual exclusion between processes ==
+  [PASS] 62.1 init
+  [PASS] 62.2 initial create
+  [PASS] 62.3 create 1 completed; create 2 rejected by lock
+  [PASS] 62.4 no temporaries after concurrency with lock
+  [PASS] 62.5 verify after concurrency with lock
+  [PASS] 62.6 snapshots created correctly (2)
+  [PASS] 63.5 remote install
+  [PASS] 63.6 remote init
+  [PASS] 63.7 remote create (timeout active)
+  [PASS] 63.8 remote verify
+
+== [64/112] 64. Index Checksum: FNV1A-64 / BLAKE2B integrity ==
+  [PASS] 64.1 init
+  [PASS] 64.2 create
+  [PASS] 64.3 verify before corrupting
+  [PASS] 64.4 index checksum is non-zero (fnv1a): 4a91a2ee5aee5735
+  [PASS] 64.5 verify detects corrupt index via checksum (rc=1)
+  [PASS] 64.6 verify passes after restoring clean index
+
+== [65/112] 65. Ouroboros: The repo scans itself ==
+  [PASS] 65.3 BareSnap completed scanning its own structure without deadlock
+  [PASS] 65.4 Zero zombie temporaries after Ouroboros scan
+  [PASS] 65.5 verify of the repo survives the cannibal scan
+  [PASS] 65.6 User data remains intact on disk
+
+== [66/112] 66. File Cache Self-Healing (Cache Healing) ==
+  [PASS] 66.1 init
+  [PASS] 66.2 create v1
+  [PASS] 66.3 create v2 (delta expected)
+  [PASS] 66.4 file cache artificially corrupted
+  [PASS] 66.5 create post-corruption (auto-heal)
+  [PASS] 66.6 verify after auto-heal
+  [PASS] 66.7 restore after auto-heal
+  [PASS] 66.8 correct content after auto-heal
+  [PASS] 66.9 file cache regenerated correctly (192 bytes)
+
+== [67/112] 67. Integrated battery: weird paths ==
+  [PASS] 67.1 init weird
+  [PASS] 67.2 create weird
+  [PASS] 67.3 restore weird
+  [PASS] 67.4 restore identical
+  [PASS] 67.5 full extract weird
+  [PASS] 67.6 full extract identical
+  [PASS] 67.7 full extract preserves empty directory
+  [PASS] 67.8 selective extract empty directory
+  [PASS] 67.9 selective extract preserves empty directory
+  [PASS] 67.10 weird multiple extract
+  [PASS] 67.11 multiple extract: 6 files
+  [PASS] 67.12 extract file with spaces
+  [PASS] 67.13 file with spaces extracted correctly
+  [PASS] 67.14 init trailing space
+  [PASS] 67.15 create trailing space
+  [PASS] 67.16 restore trailing space
+  [PASS] 67.17 correct content with source ending in space
+
+== [68/112] 68. Integrated battery: CLI edge cases ==
+  [PASS] 68.1 init edge repo
+  [PASS] 68.2 create with non-existent --zstd
+  [PASS] 68.3 create with --compress typo
+  [PASS] 68.4 create with --compression without value
+  [PASS] 68.5 create with --zstd-level without value
+  [PASS] 68.6 init with --compression without value
+  [PASS] 68.7 create --zstd-level 5 auto-init
+  [PASS] 68.8 info confirms zstd after --zstd-level
+  [PASS] 68.9 normal create for extract
+  [PASS] 68.10 extract with path traversal ../
+  [PASS] 68.11 extract with absolute path
+  [PASS] 68.12 extract with target that is a file
+  [PASS] 68.13 extract with non-existent filter does not crash
+  [PASS] 68.14 extract ignored non-existent filter
+  [PASS] 68.15 init repo symlink source
+  [PASS] 68.16 create from symlink to directory
+  [PASS] 68.17 restore from symlink source
+  [PASS] 68.18 content from symlink restored
+  [PASS] 68.19 init repo weird permissions
+  [PASS] 68.20 create ignored directory without permissions and continued (rc=0)
+  [PASS] 68.21 verify after create with weird permissions
+  [PASS] 68.22 restore with non-existent snapshot
+  [PASS] 68.23 init on existing repo
+  [PASS] 68.24 init repo collision
+  [PASS] 68.25 create repo collision
+  [PASS] 68.26 extract with type collision does not crash
+  [PASS] 68.27 extract respected pre-existing directory safely
+  [PASS] 68.28 init repo ls
+  [PASS] 68.29 create repo ls
+  [PASS] 68.30 ls with unknown option
+  [PASS] 68.31 extract with mixed safe + unsafe filters
+
+== [69/112] 69. INTEGRATED FINAL BOSS (adapted Dual Core) ==
+  [PASS] 69.1 init final boss
+  [PASS] 69.2 reduced swarm created (100 files)
+  [PASS] 69.3 create swarm
+  [PASS] 69.4 restore swarm
+  [PASS] 69.5 swarm file count
+  [PASS] 69.6 verify swarm
+  [PASS] 69.7 init delta
+  [PASS] 69.8 create delta v1
+  [PASS] 69.9 create delta v2
+  [PASS] 69.10 create delta v3
+  [PASS] 69.11 3 delta snapshots created
+  [PASS] 69.12 prune --keep-last 1
+  [PASS] 69.13 1 snapshot after prune
+  [PASS] 69.14 verify after delta prune
+  [PASS] 69.15 restore after delta prune
+  [PASS] 69.16 delta.txt correct after prune+restore
+  [PASS] 69.17 init encrypted
+  [PASS] 69.18 create encrypted v1
+  [PASS] 69.19 create encrypted v2
+  [PASS] 69.20 restore encrypted
+  [PASS] 69.21 secret.txt correct
+  [PASS] 69.22 random.bin byte-identical
+  [PASS] 69.23 selective extract encrypted
+  [PASS] 69.24 encrypted extract with weird paths correct
+  [PASS] 69.25 restore encrypted with incorrect pass
+  [PASS] 69.26 init earthquake
+  [PASS] 69.27 create snap 1
+  [PASS] 69.28 create snap 2
+  [PASS] 69.29 verify before earthquake
+  [PASS] 69.30 earthquake applied (pack deleted + corrupt snap + deleted idx)
+  [PASS] 69.31 verify detects corruption
+  [PASS] 69.32 verify passes after repair
+  [INFO] post-earthquake: 0 alive, 2 in damaged/
+  [PASS] 69.33 damaged snapshots moved to damaged/
+  [PASS] 69.34 init labyrinth
+  [PASS] 69.35 labyrinth created (68 levels)
+  [PASS] 69.36 create labyrinth
+  [PASS] 69.37 restore labyrinth
+  [PASS] 69.38 deep file restored
+  [PASS] 69.39 verify labyrinth
+  [PASS] 69.40 init fuzzing
+  [PASS] 69.41 create fuzzing
+  [PASS] 69.42 snapshot copied for fuzzing (272 bytes)
+  [PASS] 69.43 fuzzing mutation 1 detected
+  [PASS] 69.43 fuzzing mutation 2 detected
+  [PASS] 69.43 fuzzing mutation 3 detected
+  [PASS] 69.44 verify OK after restoring clean snapshot
+  [PASS] 69.45 init apocalypse
+  [PASS] 69.46 concurrent creates finished
+  [PASS] 69.47 at least 1 snapshot created (1)
+  [PASS] 69.48 verify post-apocalypse
+  [PASS] 69.49 prune --keep-last 1
+  [PASS] 69.50 verify after prune
+  [PASS] 69.51 restore post-apocalypse
+  [PASS] 69.52 integrated FINAL BOSS passed
+
+== [70/112] 70. DeLorean Effect: CMOS battery death (Epoch Reset 1970) ==
+  [PASS] 70.1 init
+  [PASS] 70.1 initial create in correct year (2026)
+  [PASS] 70.2 incremental create under faketime 1970
+  [PASS] 70.3 zero collisions by UUID v4 (2 snapshots)
+  [PASS] 70.4 verify without crash after time eclipse
+  [PASS] 70.5 prune --keep-last 1 under temporal distortion
+  [PASS] 70.5 prune kept 1 snapshot
+  [PASS] 70.6 restore post-temporal chaos
+  [PASS] 70.6 global verify positive after temporal chaos
+
+== [71/112] 71. Advanced Cryptography: Full Cycle with AES-256-GCM ==
+  [PASS] 71.1 init with --encrypt aes --compression zstd
+  [PASS] 71.1b info confirms AES
+  [PASS] 71.2 create with AES-256-GCM pipeline
+  [PASS] 71.3 zero plaintext leaks in physical structures
+  [PASS] 71.4 verify: GCM authentication and integrity correct
+  [PASS] 71.5 cryptographic firewall blocks false passphrase
+  [PASS] 71.6 legitimate restore with AES-256-GCM
+  [PASS] 71.6 top_secret.db byte-identical
+  [PASS] 71.6 crypto_test.bin byte-identical
+  [PASS] 71.7 prune --keep-last 1 with AES-256-GCM
+  [PASS] 71.7 verify after prune with AES
+
+== [72/112] 72. The End of Time: Resistance to the Unix Y2K38 Apocalypse ==
+  [PASS] 72.1 time jump simulation completed (clock in 2039)
+  [PASS] 72.2 init in 2039
+  [PASS] 72.2 create in 2039 (time_t 64-bit assimilates metadata)
+  [PASS] 72.3 list shows snapshot from the future without corruption (snap_post_2038_2039-01-01_12-10-00-744_aa5c46c6.snap)
+  [PASS] 72.4 verify in Y2K38 environment
+  [PASS] 72.4 prune under 2039 temporal distortion
+  [PASS] 72.5 restore in the year 2039
+  [PASS] 72.5 futuro.txt byte-identical after restore in 2039
+  [PASS] 72.5 future_blob.bin byte-identical
+  [PASS] 72.6 mtime from 2039 preserved correctly
+
+== [73/112] 73. Induced Bit Rot: Cosmic Ray in Packs (AES-256-GCM) ==
+  [PASS] 73.1 init --encrypt aes
+  [PASS] 73.1b info confirms AES
+  [PASS] 73.1c create snapshot pre-rot
+  [PASS] 73.2 injection of 1 byte mutation at offset 1024
+  [PASS] 73.3 verify detected integrity failure (altered MAC/GCM Tag)
+  [PASS] 73.4 automatic pack quarantine without memory panic
+
+== [74/112] 74. Space Apocalypse: ENOSPC Management ==
+  [PASS] 74.1 init (TSan Shielded)
+  [PASS] 74.2 write interruption captured (TSan Shielded)
+  [PASS] 74.3 atomic rollback of index after ENOSPC (TSan Shielded)
+  [PASS] 74.4 no orphan temporaries after ENOSPC (TSan Shielded)
+
+== [75/112] 75. Concurrent Swarm: Mutual Exclusion ==
+  [PASS] 75.1 init
+  [PASS] 75.2 firing of 5 concurrent sub-processes completed (ok=1 locked=4)
+  [PASS] 75.3 verify after concurrent burst
+  [PASS] 75.4 1 snapshot(s) created under concurrency
+  [PASS] 75.5 no temporaries after concurrency
+
+== [76/112] 76. Zombie Inode: hot file deletion during CDC ==
+  [PASS] 76.1 init
+  [PASS] 76.2 no crash or temporaries (rc=0)
+  [PASS] 76.3 verify of the repo intact
+  [PASS] 76.4 restore of the snapshot
+  [PASS] 76.5 stable file preserved
+
+== [77/112] 77. Pack Tamper: physical mutation in encrypted pack (AES-256-GCM) ==
+  [PASS] 77.1 init aes
+  [PASS] 77.1b info confirms AES
+  [PASS] 77.2 create aes
+  [PASS] 77.3 verify before tamper
+  [PASS] 77.4 byte injected at offset 65728 (encrypted data zone)
+  [PASS] 77.5 verify detected corrupt pack (GCM/CRC)
+
+== [78/112] 78. Config Fuzzing: central config sabotage ==
+  [PASS] 78.1 init
+  [PASS] 78.2 config overwritten with garbage
+  [PASS] 78.3 list did not crash with corrupt config (rc=0)
+  [PASS] 78.4 verify rejected corrupt config
+  [PASS] 78.5 create rejected corrupt config
+
+== [79/112] 79 Battery Death: kill -9 during create ==
+  [PASS] 79.1 init
+  [PASS] 79.2 source created (128 MB + 200 small files)
+  [PASS] 79.3 kill -9 sent in the middle of create (pid=36953)
+  [PASS] 79.4 no temporaries after kill -9
+  [PASS] 79.5 verify OK after kill -9 + repair
+
+== [80/112] 80. Frankenstein Repo: config+index deleted ==
+  [PASS] 80.1 init
+  [PASS] 80.2 create
+  [PASS] 80.3 create survived Frankenstein repo (auto-init + recreate)
+  [PASS] 80.4 post-frankenstein: clean audit (2 packs, 1 idx, 1 blm, 0 tmp)
+
+== [81/112] 81. Inconsistent repo (config manually deleted) ==
+  [PASS] 81.1 init healthy repo
+  [PASS] 81.2 create first snapshot
+  [PASS] 81.3 create detected corrupt repo and aborted with clear message
+  [PASS] 81.4 health --repair recovers the repo
+  [PASS] 81.5 create works after repair
+
+== [82/112] 82. Entropy Firewall: Automatic ZSTD Bypass ==
+  [PASS] 82.1 init base repo
+  [PASS] 82.2 create snapshot with mixed data in ZSTD 15
+  [PASS] 82.3 Entropy firewall active (29 chunks skipped compression)
+
+== [83/112] 83. Dynamic Compression: LZ4 and ZSTD Coexistence per Snapshot ==
+  [PASS] 83.1 init repo with LZ4 by default
+  [PASS] 83.2 create snapshot 1 forcing dynamic ZSTD
+  [PASS] 83.3 create snapshot 2 forcing dynamic LZ4
+  [PASS] 83.4 Info correctly reads repository with mixed dynamic compression
+  [PASS] 83.5 global verify on mixed LZ4/ZSTD repository successful
+
+== [84/112] 84. Encryption and Health: invalid key does not generate false positive ==
+  [PASS] 84.1 init --encrypt
+  [PASS] 84.2 create encrypted
+  [PASS] 84.3 verify encrypted (correct key)
+  [PASS] 84.4 health with incorrect key aborts cleanly (rc=1)
+  [PASS] 84.5 damaged/ was not created (no destructive false positive)
+  [PASS] 84.6 verify still passes with correct key
+  [PASS] 84.7 restore still works
+
+== [85/112] 85. Index Grow: 2000 small files without recursive OOM ==
+  [PASS] 85.1 init
+  [PASS] 85.2 2000 small files created
+  [PASS] 85.3 massive create (2000 files, forces index grow)
+  [PASS] 85.4 verify after massive backup
+  [PASS] 85.5 massive restore
+  [PASS] 85.6 2000 files restored
+  [PASS] 85.7 correct content
+
+== [86/112] 86. Append & CRC32C: hot modifications ==
+  [PASS] 86.1 init
+  [PASS] 86.2 initial create (100 files)
+  [PASS] 86.3 hot modifications applied (50 appends + 100 new)
+  [PASS] 86.4 incremental create (append + CRC32C)
+  [PASS] 86.5 incremental verify (CRC32C integrity)
+  [PASS] 86.6 incremental restore
+  [PASS] 86.7 modified content present in restore
+  [PASS] 86.8 200 files after incremental
+
+== [87/112] 87. LRU Cache Eviction: large packs without dangling pointers ==
+  [PASS] 87.1 init
+  [PASS] 87.2 30 2MB files created (60 MB total)
+  [PASS] 87.3 create with large packs (fills cache)
+  [PASS] 87.4 massive restore completed without crash (LRU eviction OK)
+  [PASS] 87.5 30/30 files byte-identical after LRU eviction
+  [PASS] 87.6 verify after LRU eviction
+
+== [88/112] 88. Basic LIST: normal directory ==
+  [PASS] 88.1 init
+  [PASS] 88.2 create
+  [PASS] 88.3 ls works
+  [PASS] 88.4 ls shows file1.txt
+  [PASS] 88.5 ls shows subdir
+  [PASS] 88.6 ls shows nested.txt
+
+== [89/112] 89. LIST with long names (255 chars) ==
+  [PASS] 89.1 init
+  [PASS] 89.2 create with long name
+  [PASS] 89.3 ls with long name works
+  [PASS] 89.4 ls shows file with long name
+  [PASS] 89.5 restore with long name
+  [PASS] 89.6 long file restored correctly
+
+== [90/112] 90. LIST with deep path (20 levels) ==
+  [PASS] 90.1 init
+  [PASS] 90.2 create with deep path
+  [PASS] 90.3 ls recursive with deep path
+  [PASS] 90.4 restore with deep path
+  [PASS] 90.5 deep file content correct
+  [PASS] 90.6 verify with deep path
+
+== [91/112] 91. LIST with 5000 files (readdir stress) ==
+  [PASS] 91.1 5000 files created
+  [PASS] 91.2 init
+  [PASS] 91.3 create with 5000 files
+  [PASS] 91.4 ls with 5000 files works
+  [PASS] 91.5 ls lists 5000/5000 files
+  [PASS] 91.6 selective extract of 5000
+  [PASS] 91.7 selective extract correct
+  [PASS] 91.8 verify with 5000 files
+
+== [92/112] 92. SSH: Remote LIST with long names ==
+  [PASS] 92.1 remote install
+  [PASS] 92.2 remote init
+  [PASS] 92.3 remote create with long name
+  [PASS] 92.4 remote ls works
+  [PASS] 92.5 remote ls shows long file
+  [PASS] 92.6 remote restore with long name
+  [PASS] 92.7 long file restored correctly via SSH
+  [PASS] 92.8 remote verify
+
+== [93/112] 93. Bug #1: Integer overflow in prune (malicious offset) ==
+  [PASS] 93.1 init
+  [PASS] 93.2 create
+  [PASS] 93.3 malicious offset injected in pack
+  [PASS] 93.4 prune did not crash with malicious offset (rc=0)
+  [PASS] 93.5 verify did not crash with malicious offset (rc=1)
+
+== [94/112] 94. Bug #2: Partial write / truncated pack ==
+  [PASS] 94.1 init
+  [PASS] 94.2 create
+  [PASS] 94.3 verify before truncating
+  [PASS] 94.4 pack truncated to 32855 bytes (from 65710) with truncate
+  [PASS] 94.5 verify detected truncated pack (rc=1)
+  [PASS] 94.6 remote install
+  [PASS] 94.7 remote init
+  [PASS] 94.8 remote create (full upload)
+  [PASS] 94.9 remote verify (intact upload)
+
+== [95/112] 95. Bug #3: Delta restore error (goto pass_end) ==
+  [PASS] 95.1 init
+  [PASS] 95.2 create v1 (base for delta)
+  [PASS] 95.3 create v2 (delta expected)
+  [PASS] 95.4 packs corrupted (delta cannot reconstruct)
+  [PASS] 95.5 restore failed cleanly without crash (rc=0)
+  [PASS] 95.6 no empty partial files in output
+
+== [96/112] 96. Bug #4: comp_buf leak in join_and_fail ==
+  [PASS] 96.1 init
+  [PASS] 96.2 create normal
+  [PASS] 96.3 no temporaries after normal create
+  [PASS] 96.4 create with invalid path failed cleanly (rc=1)
+  [PASS] 96.5 no temporaries after failed create
+  [PASS] 96.6 verify after failed create
+
+== [97/112] 97. Bug #5: tls:// and sftp:// correctly rejected ==
+  [PASS] 97.1 init tls:// fails cleanly (rc=1)
+  [PASS] 97.2 init sftp:// fails cleanly (rc=1)
+  [PASS] 97.3 no garbage local directories created
+  [PASS] 97.4 create tls:// fails cleanly (rc=1)
+  [PASS] 97.5 init ssh:// invalid host fails without crash (rc=1)
+
+== [98/112] 98. Bug #6: VFS cleanup between operations ==
+  [PASS] 98.1 init local
+  [PASS] 98.2 create local
+  [PASS] 98.3 remote install
+  [PASS] 98.4 remote init
+  [PASS] 98.5 remote create
+  [PASS] 98.6 restore local after remote operation
+  [PASS] 98.7 correct content after local→remote→local sequence
+  [PASS] 98.8 remote verify after local operations
+
+== [99/112] 99. Bug #7: VFS open with brs_uri_is_remote() ==
+  [PASS] 99.1 remote install
+  [PASS] 99.2 remote init
+  [PASS] 99.3 remote create
+  [PASS] 99.4 remote list shows 1 snapshot
+  [PASS] 99.5 remote info works
+  [PASS] 99.6 remote verify
+  [PASS] 99.7 remote diff works
+
+== [100/112] 100. Bug #8: brs_uri.h included correctly ==
+  [PASS] 100.1 binary executable
+  [PASS] 100.2 binary parses URIs without crash (brs_uri.h OK)
+  [PASS] 100.3 --version works
+
+== [101/112] 101. Bug #9: stdio.h included in VFS dispatch ==
+  [PASS] 101.1 binary prints scheme error without crash (stdio.h OK)
+  [PASS] 101.2 descriptive error message present
+
+== [102/112] 102. Bug #10: BrsRepoLock without conflict ==
+  [PASS] 102.1 init
+  [PASS] 102.2 create (acquires lock)
+  [PASS] 102.3 create 2 (lock re-acquired)
+  [PASS] 102.4 lock file does not exist (clean)
+  [PASS] 102.5 prune (lock in prune)
+  [PASS] 102.6 verify (lock in verify)
+
+== [103/112] 103. Integrated regression post-fixes (full cycle) ==
+  [PASS] 103.1 init
+  [PASS] 103.2 create v1
+  [PASS] 103.3 create v2
+  [PASS] 103.4 list
+  [PASS] 103.5 info
+  [PASS] 103.6 verify
+  [PASS] 103.7 prune --keep-last 1
+  [PASS] 103.8 verify after prune
+  [PASS] 103.9 restore
+  [PASS] 103.10 file.txt correct
+  [PASS] 103.11 nested.txt correct
+  [PASS] 103.12 blob.bin correct
+  [PASS] 103.13 diff
+
+== [104/112] 104. Valgrind: basic stress (init/create/verify/restore) ==
+
+== [105/112] 105. Valgrind: extreme memory torture ==
+
+== [106/112] 106. Valgrind: aggressive prune (AES-256 + ZSTD) ==
+
+== [107/112] 107. FIX F1: Encrypted Frankenstein (lost config + encrypted snapshots) ==
+  [PASS] 107.1 init --encrypt
+  [PASS] 107.2 create encrypted
+  [PASS] 107.3 original snapshot has encrypted magic
+  [PASS] 107.4 repair completed without crash (rc=0)
+  [PASS] 107.5 config recreated
+  [PASS] 107.6 repair detected encrypted snapshots before recreating config
+  [PASS] 107.7 create aborted cleanly with degraded encrypted config (rc=1)
+  [PASS] 107.8 init plain
+  [PASS] 107.9 create plain
+  [PASS] 107.10 create works after plain repair
+  [PASS] 107.11 verify of repaired plain repo completed successfully (FNV1A stable)
+
+== [108/112] 108. FIX O1: POSIX RAM Guardian (ZSTD Ultra with low memory) ==
+  [PASS] 108.1 init
+  [PASS] 108.2 create with level 22 + simulated low RAM finishes OK
+  [PASS] 108.3 guardian activated: ZSTD level dynamically degraded
+  [PASS] 108.4 verify of snapshot created under guardian
+  [PASS] 108.5 restore under guardian
+  [PASS] 108.6 content byte-identical
+  [PASS] 108.7 normal ZSTD-22 create finishes OK
+  [PASS] 108.8 guardian inactive with sufficient RAM (2267 MB)
+
+== [109/112] 109. FIX M1: corrupt parse without leaks or crash (goto parse_error) ==
+  [PASS] 109.1 init
+  [PASS] 109.2 create
+  [PASS] 109.3 early failure controlled (rc=1)
+  [PASS] 109.4 middle failure controlled (rc=1)
+  [PASS] 109.5 health tolerates corrupt snapshot (rc=1)
+  [PASS] 109.6 valgrind telemetry skipped (--no-valgrind flag active)
+  [PASS] 109.7 verify passes after restoring clean snapshot
+
+== [110/112] 110. FIX R1: remote agent — handle churn ==
+  [PASS] 110.1 remote install
+  [PASS] 110.2 remote test
+  [PASS] 110.3 remote init
+  [PASS] 110.4 remote create (cycle 1)
+  [PASS] 110.5 remote restore (cycle 1)
+  [PASS] 110.6 correct content (cycle 1)
+  [PASS] 110.7 remote create (cycle 2)
+  [PASS] 110.8 remote verify
+  [PASS] 110.9 remote restore (cycle 2)
+  [PASS] 110.10 v2 content correct
+  [PASS] 110.11 burst list/info without errors
+  [PASS] 110.12 final remote verify
+
+== [111/112] 111. Elastic Pause: Adaptive throttling under saturation ==
+  [PASS] 111.1 init
+  [PASS] 111.2 high entropy stress dataset generated (4 MB)
+ [INFO] dataset ready. Forcing 50 KB/s backpressure with short timeout (3s)
+  [PASS] 111.3 / 111.4 / 111.5 throttling simulation managed
+  [PASS] 111.6 repository intact
+  [PASS] 111.7 restore post-devastation
+  [PASS] 111.8 control.txt identical
+  [PASS] 111.9 heavy_io.bin byte-identical
+
+== [112/112] 112. Resource Control: Concurrent Lock Verification ==
+  [PASS] 112.1 Initialize repository for concurrency
+  [PASS] 112.2 Create initial reference snapshot
+ [INFO] Occupying mutual exclusion descriptor to simulate contention...
+  [PASS] 112.3 Create operation aborts cleanly when resource is occupied
+  [PASS] 112.4 Prune operation aborts cleanly when resource is occupied
+ [INFO] Mutual exclusion descriptor released correctly.
+  [PASS] 112.5 Verify operation confirms integrity after release
+  [PASS] 112.6 Create new snapshot after recovering mutual exclusion
+
+============================================================
+⏱️  TOTAL EXECUTION TIME: 20m 51s
+============================================================
+RESULT: 889/889 tests passed
+Log saved at: mega_test.log

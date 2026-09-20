@@ -1,0 +1,81 @@
+== S1. Basic cycle: init/create/restore/verify ==
+[PASS] init
+[PASS] create
+[PASS] restore
+[PASS] content
+[PASS] verify
+
+== S2. Delta encoding: 5 versions ==
+[PASS] init
+[PASS] create v1
+[PASS] create v2
+[PASS] create v3
+[PASS] create v4
+[PASS] create v5
+[PASS] verify
+[PASS] restore v5
+[PASS] content v5
+
+== S3. ChaCha20 encryption: full cycle ==
+[PASS] init --encrypt
+[PASS] create
+[PASS] verify
+[PASS] restore
+[PASS] content
+[PASS] prune
+[PASS] verify post-prune
+
+== S4. AES-256-GCM encryption: full cycle ==
+[PASS] init --encrypt aes
+[PASS] create
+[PASS] verify
+[PASS] restore
+[PASS] content
+[PASS] prune
+[PASS] verify post-prune
+
+== S5. Symlinks + hardlinks ==
+[PASS] init
+[PASS] create
+[PASS] restore
+[PASS] symlink
+[PASS] hardlink same inode
+
+== S6. Selective extract + ls + diff + info ==
+[PASS] init
+[PASS] create snap1
+[PASS] create snap2
+[PASS] selective extract
+[PASS] ls
+[PASS] diff
+[PASS] info
+
+== S7. ZSTD: full cycle ==
+[PASS] init zstd
+[PASS] create
+[PASS] verify
+[PASS] restore
+[PASS] content
+
+== S8. Aggressive prune: 10 snapshots → 1 ==
+[PASS] init
+[PASS] 10 snapshots created
+[PASS] prune --keep-last 1
+[PASS] 1 snapshot after prune
+[PASS] verify post-prune
+
+== S9. Health check + repair ==
+[PASS] init
+[PASS] create
+[PASS] clean health
+
+== S10. Empty file + large file (4 MB) ==
+[PASS] init
+[PASS] create
+[PASS] restore
+[PASS] empty.txt size 0
+[PASS] large.bin identical
+
+============================================================
+RESULT: 58/58 tests passed ✅
+If there is no ASan/UBSan output above = ZERO memory errors
