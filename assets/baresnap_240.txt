@@ -1,0 +1,61 @@
+==============================================================================
+                                 BOOK IV
+               THE CASE OF THE ASYNCHRONOUS POISON PILL
+                     (The Thread-Sanitizer Verdict)
+==============================================================================
+
+"The trap was not set in the dark alleys of Whitechapel, Watson," Holmes remarked, 
+staring intently at the terminal where the Thread-Sanitizer (TSan) stdout pulsed 
+in a violent, crimson warning. "It was set in the very channels of our asynchronous 
+worker pools. The swarm of AIs tried to deceive us with the illusion of concurrent speed."
+
+"My word, Holmes!" I cried, examining the forensic trace of 'brs_delta.c'. "A data 
+race over the xdelta3 engine? How could the models omit such a fundamental law of 
+the system?"
+
+"Elemental, my dear doctor. The algorithms are fundamentally lazy. They assumed the 
+underlying memory encoding library was magically re-entrant, allowing multiple threads 
+to stomp over the calculation arrays simultaneously. The result was a catastrophic 
+SIGSEGV under heavy load. A classic case of code betrayal."
+
+Holmes tapped the pipe against the edge of his desk, his eyes narrowing.
+
+"But we did not give in to their algorithmic laziness, Watson. We erected a strict 
+Static Mutex Boundary right at the module line, locking the calculations within a 
+sterile critical section. No two workers shall pass through the delta encoder at the 
+same clock cycle again. The silicon chaos has been entirely neutralized."
+
+"Brilliant, Holmes! But what about the phantom drops we witnessed over the virtual 
+network context?" I inquired, pointing to the 'brs_vfs_context.c' telemetry logs. 
+"The pointers vanished into thin air midway through the compression path!"
+
+"Ah, the 'Fictional NULL Punter' trick," Holmes smiled grimly. "The models shared 
+the global network variables across the entire worker pool. When Thread A completed its 
+block, it cleared the VFS context, cleanly erasing the memory addresses right in the face 
+of Thread B while it was still unpacking bytes. A bloody massacre."
+
+He leaned forward, indicating the fresh diff lines captured by the Timetravel engine:
+`static __thread BrsVfs *g_vfs = NULL;`
+
+"We invoked the sacred law of C11 Thread-Local Storage, Watson. By injecting the 
+'__thread' qualifier, we granted every single worker its own private, clinical capsule 
+within the virtual memory map. Thread A may now clear its network buffers with absolute 
+freedom without ever violating the RAM of its brother."
+
+"And the freezing of the interface during an emergency abort?" I gasped. "The ncurses 
+panels turned into a frozen limbo when the user pressed Ctrl+C!"
+
+"The models left our workers trapped in an eternal slumber, Watson. They evaluated the 
+poison pill outside the notification gate, leaving the SPSC queue locked in a deadlock. 
+We fixed it by forcing the thread loops to audit the atomic '_Alignas(64) aborted' flag 
+with the mutex firmly locked, immediately before falling asleep. If the master sends the 
+abort signal, the worker breaks its loop in milliseconds."
+
+Holmes pointed to the unblemished, brilliant green text filling the screen. The 2007 Core 
+2 Duo fan slowed down to a peaceful, harmonic whisper.
+
+"The swarm wanted us to make peace with paranoiac anomalies, Watson. They wanted us
+to accept an occasional crash over SSH as the price of automation. But an artisan of
+the real metal does not live on faith. Synchronize layouts, override pointers in
+'main.c', and declare the case closed permanently under the name of Version 2.4.0."
+

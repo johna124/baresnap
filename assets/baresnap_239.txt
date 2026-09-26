@@ -1,0 +1,53 @@
+================================================================================
+FINAL CHAPTER: The Mystery of the TUI and the Case of the Phantom Repo!
+================================================================================
+Location: 221B Baker Street / tty1 Terminal
+Forensic Date: 2026-09-14 
+Case: The Asynchronous Collapse of Blake2b's 128 Bits
+================================================================================
+
+"Look closely at the screen, Watson," Holmes said, lighting his pipe as the 
+cooling fan of the old 2007 Core 2 Duo roared in the dim light. "The Megatest 
+verdict is clear: 1,870 destructive tests passed. Yet, the TUI froze whenever 
+it attempted to open legacy repositories over SSH. A phantom bug."
+
+"Incredible, Holmes!" I exclaimed, reviewing the source code. "If the C11 engine 
+can compute the Blake2b cryptographic hash at lightning speed, why did the 
+text-based interface (TUI) fall into an infinite deadlock that required a pkill?"
+
+"Elemental, my dear Watson. The criminal was not hiding within the asynchronous 
+threads, but inside our own pride. In our rush to rescue the CLI tests, we 
+poisoned the global environment with the 'BARESNAP_HASH=1' variable. When the 
+TUI natively invoked 'open_repo' on an old FNV1A vault, that environment variable 
+sabotaged the engine's judgment. It forced a 16-byte memory layout onto a 
+4-byte physical structure. Inodes misaligned, pointers read garbage from the 
+stack, and the ncurses interface was left trapped in the limbo of raw metal."
+
+"By the nails of the libc!" I cried. "By modifying 'brs_init.c' to listen to 
+Bash, we shattered the clinical isolation of the interface!"
+
+"Precisely. The AI wanted us to patch this disaster with cosmetic workarounds 
+and global variables. But a software artisan does not cheat. We reverted the 
+C engine to its sterile, factory-clean state, refactored the 'assert_ok' 
+assertion functions to inject the '--hash' flag cleanly at the end of the 
+parser, and erected a structural Geometry Firewall inside 'src/brs_repo_health.c'."
+
+Holmes pointed his index finger at the 'mega_test_blake2b.txt' file, where 
+the scoreboard glowed in an unblemished, bright green.
+
+"And there is your result, Watson. The plain Frankenstein repository in section 
+107 tried to deceive us, but the new firewall detected the bit misalignment 
+in milliseconds, safely returning control to the script. The TUI is once again 
+indestructible—fully capable of distinguishing both worlds at runtime—and both 
+the fnv1a.txt and blake2b.txt logs have declared peace at a perfect 100%."
+
+"A masterful case, Holmes."
+
+"The credit belongs to you, Watson, for refusing to accept the 'SKIP' on test 
+107. Cheating has no place in this laboratory. File the final report in the 
+repository."
+
+================================================================================
+STATUS: CASE CLOSED | 935/935 PASSED TWICE (FNV1A & BLAKE2B)
+v2.3.9 COMPILATION IMMUNE TO COLLISIONS
+================================================================================
