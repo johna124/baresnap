@@ -1,0 +1,255 @@
+================================================================================
+THE COMPLETE CHRONICLES: The Adventures of the TUI and the Phantom Deadlocks
+================================================================================
+Location: 221B Baker Street / tty1 Terminal and the SSH Tunnels of Europe
+Forensic Date: September 16, 2026 (after 130+ grueling iterations)
+Case Files: The Great Musl Conspiracy & The Asynchronous Collapse of 2.3.9.1
+================================================================================
+
+"Put down that strace output, Watson," Holmes said, lighting his pipe as the
+cooling fan of our ancient Core 2 Duo roared in the dim amber glow of the CRT
+monitor. "You are staring at the symptoms, not the disease. One hundred and
+thirty iterations we have endured. The TUI compiles, the CLI reconstructs
+chunks with military precision, yet the moment we invoke F6 over SSH, the
+entire edifice collapses into silence."
+
+"But Holmes!" I exclaimed, wiping sweat from my brow as another Segmentation
+Fault echoed across the terminal. "The logic is mathematically flawless! We
+have BLAKE2B_128 hashing at wire speed, XChaCha20-Poly1305 encryption, and
+our Megatest passes 1,870 destructive cases! How can version 2.1.5 work
+perfectly while 2.3.9.1 hangs like a broken marionette?"
+
+"Flawless to the untrained eye, my dear fellow," Holmes remarked, a cold smile
+playing on his lips as he tapped his magnifying glass against the flickering
+ncurses interface. "But we are dealing with not one, not two, but FIVE
+interlocking murders. A conspiracy so deep it required us to abandon musl-gcc
+and embrace the forgiving arms of glibc just to see the corpses."
+
+================================================================================
+ACT I: The Adventure of the Silent Mutex and the SSH Betrayal
+================================================================================
+
+"Observe the crime scene, Watson," Holmes said, gesturing toward the strace
+output pinned to our corkboard. "When the user pressed F6 to extract over SSH,
+glibc screamed in agony: 'Assertion e != ESRCH || !robust failed' inside
+pthread_mutex_lock. Yet musl? Musl said nothing. Musl simply... stopped."
+
+"Good heavens!" I gasped. "A deadlock in the transport layer?"
+
+"Precisely. In src/brs_vfs_ssh.c, we had initialized the SSH transport mutex
+with the default attributes — a NON-RECURSIVE mutex. But our extraction
+pipeline, Watson, is reentrant by nature! The worker thread acquires the mutex
+to read a chunk, then calls the progress callback, which in turn queries the
+VFS state, which attempts to acquire the SAME mutex a second time!"
+
+"Astonishing! So the thread was deadlocking against itself?"
+
+"Indeed. glibc, being the strict Victorian gentleman it is, detected the
+corruption and aborted with a dignified assertion. But musl — ah, musl is a
+silent assassin. It simply parked the thread in a futex wait queue forever,
+leaving our TUI frozen in the 0/0 progress bar like a fly in amber."
+
+"And your remedy, Holmes?"
+
+"Elementary. We forged the mutex with PTHREAD_MUTEX_RECURSIVE attributes via
+pthread_mutexattr_settype. Now the same thread may knock upon the door as many
+times as it pleases, and the lock-keeper dutifully counts each visit. The
+reentrant storm passes without incident."
+
+================================================================================
+ACT II: The Murder on the Stack — A Most Illegal free()
+================================================================================
+
+"But there was more, Watson. Far more." Holmes leaned forward, his eyes
+narrowing. "Even after curing the mutex, the TUI would still crash — but only
+intermittently, only when extracting multiple directories. A classic symptom
+of heap corruption."
+
+I stared at the ASAN log he slid across the desk. "AddressSanitizer reported
+nothing! The binary simply... died."
+
+"Because ASAN's cries were being muffled, Watson! Our own brs_run_tui() had
+redirected stderr into baresnap_tui.log via freopen. The detective was
+gagged at the crime scene!" Holmes chuckled darkly. "But once we silenced the
+log redirection and let ASAN speak freely, the truth emerged from
+worker_main() at line 937."
+
+He pointed a bony finger at the offending code:
+
+    WorkerJob job;              /* Living on the STACK of run_with_progress */
+    pthread_create(&th, NULL, worker_main, &job);
+
+    static void *worker_main(void *arg) {
+        WorkerJob *job_heap = (WorkerJob *)arg;
+        free(job_heap);          /* MURDER! Freeing stack memory! */
+        ...
+    }
+
+"A free() upon stack memory!" I cried, aghast. "But how did it behave
+differently between the two libcs?"
+
+"Ah, that is the poetry of the crime. glibc's allocator, being a somewhat
+lax aristocrat, simply corrupted the heap silently and carried on — leaving
+behind erratic segfaults hours later. But musl's mallocng? It is a puritan.
+Upon detecting an invalid arena pointer, it locked its own internal mutex in
+an infinite futex wait to prevent further corruption. The worker thread died
+before ever calling brs_repo_extract, and our TUI awaited a completion signal
+that would never arrive."
+
+"So you banished the free() entirely?"
+
+"Indeed. Since run_with_progress performs pthread_join before returning, the
+WorkerJob structure outlives the thread naturally. The free() was not merely
+illegal — it was unnecessary. A murder most pointless."
+
+================================================================================
+ACT III: The Conspiracy of the Double VFS and the Stolen Context
+================================================================================
+
+Holmes rose and paced before the fireplace, his silhouette dancing against
+the bookshelves. "But the conspiracy deepened, Watson. In version 2.3.9.1,
+some well-meaning soul had added a 'private VFS' inside extract_fn:"
+
+    BrsVfs *private_vfs = brs_vfs_open(j->repo, 0);
+    brs_vfs_context_set(private_vfs, j->repo);  /* USURPS the global! */
+    ...
+    brs_vfs_context_clear();                     /* DESTROYS the global! */
+    brs_vfs_close(private_vfs);
+
+"A second SSH connection?" I whispered, scandalized.
+
+"Worse. It HIJACKED the global VFS context that brs_run_tui had so carefully
+established at startup. The main thread — still running ncurses, still
+expecting a stable SSH tunnel — suddenly found its context replaced, then
+annihilated. The next operation would attempt to read through a corpse."
+
+"And in version 2.1.5?"
+
+"2.1.5 was innocent. It simply used the global context, never opening a
+second connection. The fix was surgical: we excised the private VFS entirely,
+returning to the elegant single-context model. The global context, once
+opened at startup, now serves all operations faithfully until F10."
+
+================================================================================
+ACT IV: The Phantom of the TLS Destructor — SEGV_MAPERR at Midnight
+================================================================================
+
+"There remained one final ghost," Holmes murmured, his pipe long since
+extinguished. "Even with all locks tamed and contexts pure, musl would still
+crash at exit with SEGV_MAPERR. The terminal would freeze, the SSH session
+would hang, and our users would be stranded in a limbo of half-closed pipes."
+
+"A destructor, surely?"
+
+"Precisely, Watson. When brs_run_tui returned via the conventional path,
+musl's runtime attempted to execute Thread-Local Storage destructors and
+atexit handlers. But libssh2 — and our own ncurses windows — had already
+been partially dismantled. The destructors attempted to munmap memory that
+no longer belonged to them, triggering a fatal SEGV_MAPERR."
+
+I leaned forward. "And your solution was... inelegant?"
+
+Holmes smiled — a rare, feral smile. "I call it the Atomic Evacuation. Six
+phases of surgical demolition, culminating in _exit(0). We disarm signals,
+free panels, endwin(), close TTY descriptors, tear down the VFS, flush all
+streams, and then — like a thief vanishing through the window — we invoke
+_exit(0) directly. The kernel terminates us instantly. No destructors run.
+No munmap occurs. The SSH session closes cleanly on the remote end."
+
+"A hachazo fulminante, as our Spanish colleagues might say!"
+
+"Indeed. Crude, perhaps. But effective. glibc tolerated the graceful exit;
+musl demanded the guillotine."
+
+================================================================================
+ACT V: The Supporting Cast — Smaller Intrigues of 2.3.9.1
+================================================================================
+
+Holmes settled back into his armchair, consulting his notebook. "There were,
+of course, lesser mysteries to unravel:"
+
+"The Professional Passphrase Dialog — we replaced the crude input_line with
+a centered, cipher-aware dialog supporting three retries and XChaCha20 /
+AES-256-GCM indicators. ESC cancels cleanly; empty passphrases are rejected."
+
+"The BLAKE2B_128 Hash Selector — users may now choose between SHA-256 and
+BLAKE2B via an interactive pick_from_list menu during repo initialization
+and backup. The engine routes the choice dynamically through InitJob."
+
+"The Physical File Counter — we decoupled the extraction tally from
+cumulative chunk metrics, tracking archivos_extraidos_reales to eliminate
+false '0 items' reports during incremental restores."
+
+"The Cancel-Aware Progress Callback — tui_progress_cb now returns -1 when
+g_tui_cancel is active, allowing immediate abortion of long operations via
+Ctrl+C or ESC without awaiting natural completion."
+
+"The Auto-Closing Popup — operation results now display for 1.2 seconds via
+wtimeout, then vanish. No more wgetch blockades freezing the interface."
+
+"The Aggressive Path Normalizer — do_extract now strips leading slashes,
+redundant './' prefixes, and trailing slashes before invoking
+brs_repo_extract, preventing resolution failures in the chunk engine."
+
+"The Anti-Stack-Overflow Title Buffer — backup_title expanded to 128 bytes
+to accommodate verbose ZSTD level descriptions without stack corruption."
+
+================================================================================
+EPILOGUE: The Triumph of Pragmatism and the 105-Kilobyte Question
+================================================================================
+
+"By Jove, Holmes!" I cried, slapping my thigh as the final build completed.
+"The binary compiles cleanly under glibc! Static, portable, 850 kilobytes
+compressed with 7z! And it extracts flawlessly over SSH — single directories,
+multiple directories, entire repository trees!"
+
+Holmes nodded slowly, relighting his pipe. "And the musl build, Watson?"
+
+I hesitated. "It... still hangs, Holmes. Despite every fix. The puritan
+libc finds some microscopic undefined behavior we have not yet exorcised,
+and responds with its characteristic silent futex death."
+
+Holmes took a long, contemplative draw. "Then we face the final question,
+Watson — the question that separates the engineer from the obsessive: is the
+105-kilobyte savings of musl (745 KB vs. 850 KB) worth another 130 iterations
+of debugging?"
+
+I considered this. The glibc binary worked. It was static. It was portable
+across every Linux distribution from Debian to Arch. It weighed less than
+a megabyte compressed.
+
+"No, Holmes," I said at last. "It is not."
+
+Holmes smiled — a warm, approving smile. "Precisely, my dear fellow. We
+develop and debug with glibc, ASAN, and GDB — tools that speak plainly when
+things go wrong. We release with glibc static linking, gaining portability
+without puritan punishment. Musl remains an excellent target for the truly
+minimalist, but it is a poor diagnostic instrument. It hides memory errors
+as silent deadlocks rather than shouting assertions."
+
+He closed his notebook with finality. "The case is closed, Watson. Version
+2.3.9.1 is stable. The TUI creates incremental backups via BLAKE2B,
+negotiates SSH transport with recursive mutexes, normalizes virtual paths,
+handles multi-spaced filenames, and exits atomically without SEGV_MAPERR.
+
+"Ship it."
+
+================================================================================
+APPENDIX: The Five Commandments of Concurrent TUI Programming
+================================================================================
+
+Holmes pinned a final parchment to the corkboard for posterity:
+
+  I.   Thou shalt not free() memory that liveth upon the stack.
+  II.  Thou shalt not open a second VFS when the global context sufficeth.
+  III. Thou shalt not clear the global context whilst the UI still breatheth.
+  IV.  Thy SSH mutex shalt be RECURSIVE, lest reentrancy slay thee.
+  V.   When musl demandeth thy life, answer with _exit(0) and flee the
+       destructors.
+
+"Elementary, my dear Watson. Elementary indeed."
+
+                                          — Dr. John H. Watson, M.D.
+                                             Chronicler of the Baker Street
+                                             Software Detective Agency
+                                             September 16, 2026
