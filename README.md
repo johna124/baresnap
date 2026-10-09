@@ -76,26 +76,26 @@ Pure network performance: 445 remote SSH calls completed at an average of 4.6 mi
 
 ```text
 
-== [104/112] 104. Valgrind: basic stress (init/create/verify/restore) ==
+== [104/115] 104. Valgrind: basic stress (init/create/verify/restore) ==
   [INFO] dataset: 10 MB random + 500 files (valgrind is ~20x slower)
-  [PASS] 104.1 INIT without leaks: 0 leaks, 0 errors
-  [PASS] 104.2 CREATE without leaks: 0 leaks, 0 errors
-  [PASS] 104.3 VERIFY without leaks: 0 leaks, 0 errors
-  [PASS] 104.4 RESTORE without leaks: 0 leaks, 0 errors
+  [PASS] 104.1 INIT without leaks: 0 leaks [PASS] (Ignored 47 glibc registry warnings)
+  [PASS] 104.2 CREATE without leaks: 0 leaks [PASS] (Ignored 10409 glibc registry warnings)
+  [PASS] 104.3 VERIFY without leaks: 0 leaks [PASS] (Ignored 6072 glibc registry warnings)
+  [PASS] 104.4 RESTORE without leaks: 0 leaks [PASS] (Ignored 44872 glibc registry warnings)
   [PASS] 104.5 restore under valgrind byte-identical
 
-== [105/112] 105. Valgrind: extreme memory torture ==
+== [105/115] 105. Valgrind: extreme memory torture ==
   [INFO] dataset: 10 MB base + 500 unique files of 10 KB (impossible dedup)
-  [PASS] 105.1 INIT torture without leaks: 0 leaks, 0 errors
-  [PASS] 105.2 CREATE torture without leaks: 0 leaks, 0 errors
-  [PASS] 105.3 VERIFY torture without leaks: 0 leaks, 0 errors
-  [PASS] 105.4 RESTORE torture without leaks: 0 leaks, 0 errors
+  [PASS] 105.1 INIT torture without leaks: 0 leaks [PASS] (Ignored 47 glibc registry warnings)
+  [PASS] 105.2 CREATE torture without leaks: 0 leaks [PASS] (Ignored 18008 glibc registry warnings)
+  [PASS] 105.3 VERIFY torture without leaks: 0 leaks [PASS] (Ignored 6330 glibc registry warnings)
+  [PASS] 105.4 RESTORE torture without leaks: 0 leaks [PASS] (Ignored 46038 glibc registry warnings)
   [PASS] 105.5 unique file restored byte-identical
 
-== [106/112] 106. Valgrind: aggressive prune (AES-256 + ZSTD) ==
-  [PASS] 106.1 init --encrypt aes --compression zstd (level 3) [VERIFIED: BLAKE2B REAL ON THE REPO]
+== [106/115] 106. Valgrind: aggressive prune (AES-256 + ZSTD) ==
+  [PASS] 106.1 init --encrypt aes --compression zstd (level 3)
   [PASS] 106.2 5 encrypted snapshots created
-  [PASS] 106.3 PRUNE AES+ZSTD without leaks: 0 leaks, 0 errors
+  [PASS] 106.3 PRUNE AES+ZSTD without leaks: 0 leaks [PASS] (Ignored 4154 glibc registry warnings)
   [PASS] 106.4 1 snapshot after prune
   [PASS] 106.5 verify after encrypted prune
   [PASS] 106.6 post-prune-valgrind: clean audit (5 packs, 1 idx, 1 blm, 0 tmp)
