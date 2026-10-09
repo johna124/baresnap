@@ -65,14 +65,14 @@ OVERALL RATIO (logical/physical): 35.52x
 📊 REAL-WORLD COMPARISON (v2.4.2)
 When updating the repository over SSH (44.13 MB of logical data), BareSnap's block-level deduplication identified that 1,449 out of 1,450 chunks already existed on the remote. 
 
-┌─────────────────────┬──────────────┬──────────────┬──────────────────────────────┐
-│ Tool                │ Data Sent    │ Total Time   │ Notes                        │
-├─────────────────────┼──────────────┼──────────────┼──────────────────────────────┤
-│ BareSnap v2.4.2     │ 10.43 KB     │ ~0.9 s       │ 1 chunk, 99.93% dedup        │
-│ tar + gzip          │ 14.27 MB     │ ~7.2 s       │ 3.2s compress + 4s upload    │
-│ 7z (full re-compress)│ 6.34 MB     │ ~16.4 s      │ No dedup, no SSH             │
-│ rsync (baseline)    │ ~44.00 MB    │ ~2-5 s       │ No dedup                     │
-└─────────────────────┴──────────────┴──────────────┴──────────────────────────────┘
+
+| Tool | Data Sent | Total Time | Notes |
+| :--- | :--- | :--- | :--- |
+| BareSnap v2.4.2 | 10.43 KB | ~0.9 s | 1 chunk, 99.93% dedup |
+| tar + gzip | 14.27 MB | ~7.2 s | 3.2s compress + 4s upload |
+| 7z (full re-compress) | 6.34 MB | ~16.4 s | No dedup, no SSH |
+| rsync (baseline) | ~44.00 MB | ~2-5 s | No dedup |
+
 
 Result:
   • 1,368x less network traffic than tar+gz
