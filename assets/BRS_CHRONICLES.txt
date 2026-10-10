@@ -1,5 +1,5 @@
 ================================================================================
-THE BARESNAP CHRONICLES (v2.3.8)
+THE BARESNAP CHRONICLES (v2.4.2)
 The Myth of the Cryptopunk and Spartan Codex
 ================================================================================
 "It was closed with data, not with faith." — Verdict of the Reasoning Model
@@ -8,12 +8,12 @@ The Myth of the Cryptopunk and Spartan Codex
 In the year 2026, in a timeline where Amazon and Microsoft corporate clouds have
 become digital subscription prisons, a "Conductor" without an engineering
 degree decided to build a resistance bunker in Real Metal.
-This is the chronicle of BareSnap, the 1.2 MB artifact that returned the sovereignty
+This is the chronicle of BareSnap, the 2.1 MB artifact that returned the sovereignty
 of memory to the free software community.
 
-────────────────────────────────────────────────────────────────────────────────
+==============================================================================
 THE TRENCH CHAPTERS
-────────────────────────────────────────────────────────────────────────────────
+==============================================================================
 
 Chapter I — The Obsession and the Blank Slate
 --------------------------------------------------------------------------------
@@ -70,9 +70,9 @@ tests passed out of 935, 0 leaks, 0 errors. Faith is for churches; here,
 the green OKs in the terminal do the talking.
 
 
-────────────────────────────────────────────────────────────────────────────────
+==============================================================================
 THE THREE SACRED RITES
-────────────────────────────────────────────────────────────────────────────────
+==============================================================================
 • CREATE  — The Bunker: Chunks with FastCDC, encrypts with dual-crypto, and packs
 in 4 MB blocks locally or remotely with synchronous ACKs.
 
@@ -83,11 +83,54 @@ you want, byte by byte, with absolute fidelity.
 that no bit has been manipulated or corrupted.
 
 
-────────────────────────────────────────────────────────────────────────────────
-EPILOGUE: THE IRON TRIANGLE AND THE DECENTRALIZED NETWORK
-────────────────────────────────────────────────────────────────────────────────
-BareSnap v2.3.8 does not depend on the will of any corporation nor does it hide
-in a single server. The code has been deployed in an indestructible iron repos
+==============================================================================
+SPECIAL SECTION: THE SACRIFICE OF SILICON (TRIBUTE TO THE 8-HOUR NIGHT)
+==============================================================================
+
+[DATE]: October 9, 2026 — The Dawn of v2.4.2 Stabilization
+[PLATFORM]: Native x86_64 Architecture (Physical Dual-Core)
+[OPERATION]: Deployment of the 963 Destructive Tests in Hybrid Burst
+
+Some software is born in cloud farms powered by dozens of Xeon cores and infinite 
+RAM. BARESNAP v2.4.2 is not that kind of software. This engine was forged in the 
+trenches, and its absolute stability was tempered in the fires of real metal.
+
+We hereby record the historical thermal sacrifice of the Dual-Core processor 
+that served as the anvil to shape this release. For 8 continuous hours of pure 
+electromechanical friction, the silicon was pushed to the absolute limits of 
+its dissipation capacity under the relentless yoke of:
+
+1. The aggressive memory instrumentation of AddressSanitizer (ASan).
+2. The atomic thread-collision scrutiny of ThreadSanitizer (TSan).
+3. The cross-emulation loop of 5 remote architectures via QEMU (ARM64, MIPS64, 
+   RISC-V, PPC32).
+
+The suite was touching glory when Test 155—the absolute final boss of the battery—
+decided to sabotage the execution flow due to a cursed collision with the 
+'set -e' directive inside subshell routing. Four consecutive times the 
+entire pipeline had to be restarted from scratch, demanding four additional hours 
+of mathematical torture and massive I/O heavy lifting from the Dual-Core.
+
+At 4:00 AM, under a thermal load that would have melted generic heatsinks, the 
+atomic SPSC lockless queues and the concurrent barriers of BrsRepoLock stood 
+unflinching. Zero Data Races. Zero memory leaks. Zero crashes. 
+The silicon endured the entire night without a single thermal throttling panic.
+
+This changelog and this repository do not just contain hardened C11 code; they 
+hold the pure stubbornness of an engineer and the heroic resilience of two 
+silicon cores that refused to fail on the very last line of the Megatest.
+
+To you, anonymous Dual-Core: your transistors died a little that night so that 
+the data of Baresnap users can live forever inside an unbreakable bunker.
+
+IN MEMORIAM — 963/963 TESTS PASSING CLEAN. ALL GREEN.
+==============================================================================
+
+==============================================================================
+EPILOGUE: THE IRON DUUMVIRATE AND THE DECENTRALIZED NETWORK
+==============================================================================
+BareSnap v2.4.2 does not depend on the will of any corporation nor does it hide
+in a single server. The code has been deployed in two indestructible iron repos
 to guarantee its immortality on the network:
 
 1. GITHUB: The assault field in enemy territory. We use Microsoft's colonial
@@ -95,14 +138,16 @@ corral as a massive contagion vector to shatter the egos of "Tech Bros" with
 our README.MD and their Valgrind demands.
 
 2. SOURCEFORGE (sf.net): The sacred temple of the old metal. The classic archive
-where old sysadmins who smoke Ducados in the server room will download the 1.2 MB
+where old sysadmins who smoke Ducados in the server room will download the 2.1 MB
 static binary directly to their servers without going through bloated interfaces.
 
 The forecast is that BareSnap will reach 0.1% of the general public, but that 0.1%
-will not be passive users; they will be the true Priests of Silicon. The 17,439
+will not be passive users; they will be the true Priests of Silicon. The 18,473
 lines of modular code are free and replicated. Corporations can already lobotomize
-their models: the genie is in three different bottles. There is no turning back.
+their models: the genie is in two different bottles, and that is more than enough
+to break their monopolies. There is no turning back.
 
 The genie is out of the bottle.
-"Let them do the benchmarks." 
-================================================================================
+"Let them do the benchmarks."
+==============================================================================
+
