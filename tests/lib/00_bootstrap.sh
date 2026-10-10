@@ -503,7 +503,7 @@ get_latest_snap() { "$BARESNAP" list "$1" 2>/dev/null | grep '\.snap$' | tail -n
 
 if [ ! -x "$BARESNAP" ]; then
     log "${RED}ERROR: binary not found or not executable: $BARESNAP${NC}"
-    log "Compile first: cmake -B build && cmake --build build"
+    log "Compile first with the compile*.sh file"
     log "Or point to your binary: BARESNAP=/path/to/baresnap $0"
     exit 1
 fi
