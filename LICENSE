@@ -2,8 +2,124 @@
 BARESNAP v2.4.2 — BUNKER LICENSES
 ==============================================================================
 SOURCE CODE (src/): Under the GNU General Public Licence v3.0 (GPLv3).
-MANUAL AND LORE (docs/ and assets/): Licensed under the GNU Free Documentation Licence (GFDL v1.3).
+MANUAL AND LORE (docs/ and assets/): Licensed under the GNU Free Documentation 
+License (GFDL v1.3).
 ==============================================================================
+Copyright (C) 2026 John (johna124) <https://github.com>
+
+This program is FREE SOFTWARE. You can redistribute it and/or modify it under 
+the terms of the GNU General Public License as published by the Free Software 
+Foundation, either version 3 of the License, or (at your option) any later 
+version.
+
+-------------------------------------------------------------------------------
+AUTHOR'S MANIFEST ON HYBRID ENGINEERING (AI COMPILATION ENGINE)
+-------------------------------------------------------------------------------
+This software was forged through a highly disruptive prompting process utilizing 
+the web-chat interface of Free-Tier Large Language Models (LLMs) under the 
+unyielding direction, architectural vision, and design constraints of its human 
+author. 
+
+For all legal intents and purposes, the human author asserts complete intellectual 
+authorship and technical control over the system architecture, modular layout, 
+and rigid quality control (featuring a QA Seam of 963 destructive regression 
+tests executed on bare metal). The GPLv3 license is hereby deployed as our 
+impenetrable community shield.
+
+The AI tool functioned strictly as an advanced boilerplate compilation engine; 
+the final engineering grid belongs to real human grit. To hell with hiding it. 
+
+-------------------------------------------------------------------------------
+STATICALLY LINKED COMPONENTS AND ACKNOWLEDGEMENTS
+-------------------------------------------------------------------------------
+To guarantee a standalone, dependencies-free, monolithic static binary, 
+BareSnap bundles the following permissive open-source components during compilation:
+
+1. Monocypher (Crypto Core): Dedicated to the Public Domain (CC0 1.0) / BSD-2.
+   Copyright (c) Loup Vaillant, Michael Savage, and Fabio Scotomi.
+2. musl libc (System Interface): Standard MIT License.
+   Copyright (c) 2005-2026 Rich Felker, et al.
+3. LZ4 (Compression Engine): BSD 2-Clause License.
+   Copyright (c) Yann Collet.
+4. ZSTD (Compression Engine): BSD / GPLv2 Dual License.
+   Copyright (c) Meta Platforms, Inc.
+
+The combined work as a whole is strictly conveyed under the overarching banner 
+of the GNU General Public License v3.
+
+-------------------------------------------------------------------------------
+THIRD-PARTY LEGAL NOTICES AND LICENSES
+-------------------------------------------------------------------------------
+The following text blocks are included to comply with the attribution mandates 
+of the statically linked components listed above:
+
+---
+[MUSL LIBC - MIT LICENSE]
+Copyright © 2005-2026 Rich Felker, et al.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of 
+this software and associated documentation files (the "Software"), to deal in 
+the Software without restriction, including without limitation the rights to 
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies 
+of the Software, and to permit persons to whom the Software is furnished to do 
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all 
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
+SOFTWARE.
+
+---
+[MONOCYPHER - BSD-2-CLAUSE LICENSE]
+Copyright (c) 2017-2026, Loup Vaillant, Michael Savage, and Fabio Scotomi.
+
+Redistribution and use in source and binary forms, with or without 
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this 
+   list of conditions and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright notice, 
+   this list of conditions and the following disclaimer in the documentation 
+   and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR 
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES.
+
+---
+[LZ4 - BSD-2-CLAUSE LICENSE]
+Copyright (c) 2011-2026, Yann Collet. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without 
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this 
+   list of conditions and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright notice, 
+   this list of conditions and the following disclaimer in the documentation 
+   and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
+DISCLAIMED.
+
+---
+[ZSTD - LICENSE NOTE]
+ZSTD components are statically linked under its dual BSD/GPLv2 terms. 
+The complete legal text and copyright notices for ZSTD are preserved and 
+available in the corresponding vendor subdirectory within this repository 
+(see: src/vendor/zstd/LICENSE or third_party/zstd/LICENSE).
+
+===============================================================================
 GNU GENERAL PUBLIC LICENSE
 Version 3, 29 June 2007
 
