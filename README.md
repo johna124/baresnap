@@ -224,7 +224,7 @@ Sincerely,
 
 ---
 
-📜 Need more? Read the Full Technical Manual (173 pages of pure shrapnel, 216 bookmarks, and internal links!). 
+📜 Need more? Read the Full Technical Manual (178 pages of pure shrapnel, 217 bookmarks, and internal links!). 
 Generated natively from plain text by our very own static 'txt2pdf'.
 Not for the faint of heart or Kubernetes engineers.
 
