@@ -478,14 +478,15 @@ BARESNAP_SSH_PASSWORD="test" ./build/baresnap create ssh://test@192.168.1.2/home
 35. Notas de la IA
 36. Historia del programa
 37. Licencia
-38. Glosario alfabético
-    38.1  Términos A - B
-    38.2  Términos C - D
-    38.3  Términos E - H
-    38.4  Términos I - L
-    38.5  Términos M - P
-    38.6  Términos R - S
-    38.7  Términos T - Z
+38. Sección de ingeniería forense: bitácora de combate y parches críticos
+39. Glosario alfabético
+    39.1  Términos A - B
+    39.2  Términos C - D
+    39.3  Términos E - H
+    39.4  Términos I - L
+    39.5  Términos M - P
+    39.6  Términos R - S
+    39.7  Términos T - Z
 
 ==============================================================================
 1. QUÉ ES BARESNAP
@@ -8199,6 +8200,11 @@ VFS al finalizar la descarga física de daltas para evitar fugas de memoria
 32. CHANGELOG
 ==============================================================================
 VERSIÓN 2.4.2
+(10 Octubre de 2026)
+
+Documentación:
+- Añadida Sección de ingeniería forense: bitácora de combate y parches críticos
+
 (8 de octubre de 2026)
 
 Megatest: 
@@ -9410,7 +9416,7 @@ tests Pues el megatest, un bestia bash 332,938 bytes en 8650 líneas
 third_party, incluye el código fuente de aes-gcm, monocypher, ncurses-6.5, xdelta y zstd
 
 docs, el manual en PDF y TXT, lo que estás leyendo ahora vaya, una "biblia" de 
-174 páginas con 216 marcadores y 216 enlaces internos
+180 páginas con 217 marcadores y 217 enlaces internos
 
 Scripts_compilers, ya explicado por arriba
 
@@ -9437,7 +9443,6 @@ C                               37           3452           2127          17383
 C/C++ Header                    31            337            922           1090
 -------------------------------------------------------------------------------
 SUM:                            68           3789           3049          18473
-
 
 ==============================================================================
 34. NOTAS DEL AUTOR
@@ -9530,7 +9535,7 @@ propio riesgo o considere su despliegue en entornos controlados.
 ###############################################################################
 ALERTA FORENSE: CONTROL DE ENTROPÍA EN LA DOCUMENTACIÓN
 ###############################################################################
-Este manual técnico consta de 174 páginas, 216 marcadores y 216 enlaces 
+Este manual técnico consta de 180 páginas, 217 marcadores y 217 enlaces 
 internos binarios generados nativamente desde texto plano por 'txt2pdf'. Sin 
 embargo, el usuario e ingeniero debe procesar este texto con criterio técnico:
 
@@ -9897,7 +9902,7 @@ y te dice: "Lo dejamos estar, hablemos de otra cosa".
 
 Ahora, con esta nueva versión final (la v2.4.2), miro hacia atrás y recuerdo 
 que todo comenzó hace apenas 50 días. Hoy tenemos lore propio, registros de 
-depuración dignos de Sherlock Holmes, un manual inmenso de más de 174 páginas, 
+depuración dignos de Sherlock Holmes, un manual inmenso de unas de 180 páginas, 
 y un programa de backups con doble cifrado, doble compresión, xdelta3 para uso 
 local, VFS integrado sobre SSH, interfaz TUI y una batería de casi 1000 tests, 
 sumando 18,473 líneas de C puro para un total de 824,103 bytes de código fuente.
@@ -9909,7 +9914,6 @@ prompts mediante web-chats en Free Tier es una hazaña que no le recomiendo a
 cualquiera.
 
 Ah y recomiendo leer los "Misterios de Sherlock Holmes", directorio assets
-
 
 ==============================================================================
 37. LICENCIA
@@ -9928,15 +9932,314 @@ Versión 1.3 o cualquier versión posterior publicada por la Free Software
 Foundation; sin Secciones Invariantes, sin Textos de Portada y 
 sin Textos de Contraportada.
 
+
 ==============================================================================
-38. GLOSARIO ALFABÉTICO
+38. SECCIÓN DE INGENIERÍA FORENSE: BITÁCORA DE COMBATE Y PARCHES CRÍTICOS
+==============================================================================
+
+Para sobrevivir a la carnicería de iteraciones provocada por el desarrollo
+asistido en capa gratuita, el framework de supervisión humana impuso un 
+mecanismo de control hostil respaldado por 115 test de regresión. Esta sección
+documenta el catálogo de "traiciones algorítmicas", desajustes de arquitectura
+y fallos físicos resueltos en el metal real. Aquí no hay fe; hay datos.
+
+------------------------------------------------------------------------------
+[Ref. M16] EL SÍNDROME DEL INODO FANTASMA EN MIPS64 (Desajuste por Big Endian)
+------------------------------------------------------------------------------
+* Script de Validación: tests/suites/109_fix_m1_corrupt_parse_without_leaks_or_crash_goto_parse_error.sh
+* Síntoma: Tras un comando 'init' exitoso bajo el cifrado Argon2id, el 
+  motor rechazaba sistemáticamente la frase de contraseña válida durante las 
+  operaciones 'create' posteriores, lanzando un error crítico de "frase de 
+  contraseña incorrecta". El fallo solo se materializaba bajo arquitecturas 
+  MIPS64 Big Endian (QEMU).
+* Diagnóstico Forense: El campo 'config.algorithm' en 'brs_argon2_derive()' 
+  se dejó sin inicializar en la memoria de la pila. En ordenadores Little Endian, 
+  la basura de la pila caía en zonas neutras, pero en Big Endian mutaba la 
+  geometría del diseño de la estructura, inyectando bytes corruptos en la 
+  canalización de derivación de claves.
+* Resolución: Inicialización explícita e incondicional de la estructura a 
+  'CRYPTO_ARGON2_ID' dentro de 'src/brs_init.c'. Se restauró la alineación simétrica.
+
+
+------------------------------------------------------------------------------
+[Ref. S23] LA EVACUACIÓN ATÓMICA DE LA TUI (El Segfault de salida en Musl)
+------------------------------------------------------------------------------
+* Script de Validación: tests/valgrind_tui.sh y rutinas de salida en main.c
+* Síntoma: Al cerrar la interfaz gráfica interactiva (TUI) mediante F10/Ctrl+Q,
+  el binario estático escupía un fallo de segmento 'SEGV_MAPERR' aleatorio 
+  únicamente al compilar contra la biblioteca 'musl-libc'.
+* Diagnóstico Forense: Los destructores nativos del almacenamiento local de 
+  hilos (TLS) de musl ejecutaban llamadas automáticas a 'munmap()' sobre los 
+  segmentos de memoria asignados a 'libssh2' y 'ncurses' antes de que el proceso 
+  clausurara formalmente sus contextos activos.
+* Resolución: Extirpación de la rutina de salida estándar. Se implementó una 
+  secuencia de cierre asíncrono en 6 fases que culmina de forma destructiva 
+  e inmediata con la llamada del sistema '_exit(0)', puenteando los destructores 
+  zombi de la libc antes de que puedan corromper el mapa de memoria.
+
+------------------------------------------------------------------------------
+[Ref. C08] EL CORTAFUEGOS DE ENTROPÍA (El Síndrome del CPU Incinerado)
+------------------------------------------------------------------------------
+* Script de Validación: tests/suites/082_entropy_firewall_automatic_zstd_bypass.sh
+* Síntoma: El rendimiento del procesador Core 2 Duo de 2007 se desplomaba de 
+  forma crítica al procesar colecciones masivas de archivos ya comprimidos 
+  (.zip, .tar.gz, .mp4), provocando el sobrecalentamiento del silicio.
+* Diagnóstico Forense: Intentar pasar ruido blanco (datos de alta entropía 
+  o pre-comprimidos) a través de los algoritmos de compresión pesados LZ4/ZSTD 
+  es un desperdicio absoluto de ciclos de reloj. La IA insistía en comprimir 
+  todo el payload por defecto en la capa intermedia.
+* Resolución: Inyección de la función inline 'brs_is_chunk_incompressible()' 
+  en el hot path del chunker. El motor analiza dinámicamente los metadatos de 
+  los primeros bloques; si la entropía supera el umbral crítico, apaga el 
+  módulo ZSTD en caliente y envía el bloque en crudo al empaquetador.
+
+------------------------------------------------------------------------------
+[Ref. R34] LA TORMENTA DE RPCs POR READAHEAD CIEGO (SSH Latency Shock)
+------------------------------------------------------------------------------
+* Script de Validación: tests/suites/048_ssh_full_remote_cycle_40_tests.sh
+* Síntoma: Las operaciones de restauración remota ('restore') sobre enlaces WAN 
+  se demoraban más de 32 segundos por snapshot, a pesar de que el ancho de banda 
+  estaba infrautilizado.
+* Diagnóstico Forense: Se implementó una ventana de lectura anticipada 
+  (readahead) de 1 MiB en la capa VFS sobre SSH para "adelantarse" a las peticiones. 
+  Esto infló el tráfico descargando 271 MB de datos adyacentes de los packs que 
+  jamás llegaron a usarse, provocando una tormenta masiva de RPCs redundantes.
+* Resolución: Se descartó el readahead ciego estableciendo 'BRS_SSH_READ_WINDOW=0'. 
+  Debido a que los chunks deduplicados están dispersos de forma no secuencial 
+  en disco, la precisión de pedir exactamente los bytes solicitados mediante 
+  buffers contiguos redujo el flujo de red a 1,501 RPCs exactos y recortó el 
+  tiempo a la mitad.
+
+------------------------------------------------------------------------------
+[Ref. G11] EL ESCUDO ANTI-MUTACIÓN EN GOTO PARSE_ERROR (Valgrind Audit)
+------------------------------------------------------------------------------
+* Script de Validación: tests/suites/105_valgrind_extreme_torture_impossible_dedup_500_unique.sh
+* Síntoma: AddressSanitizer y Valgrind detectaban fugas de memoria persistentes 
+  (fugas de heap de hasta 1.5 MB) cuando la lectura de un snapshot corrupto 
+  fallaba a mitad de camino y saltaba al bloque de control de errores.
+* Diagnóstico Forense: El desasignador de memoria confiaba ciegamente en el 
+  contador dinámico 'entries_len' generado por la IA. Si la corrupción ocurría 
+  en los offsets intermedios, el contador quedaba desalineado y el bucle de 
+  liberación 'free()' ignoraba las estructuras remanentes ya asignadas.
+* Resolución: Refactorización absoluta del flujo de limpieza mediante un 
+  barrido incondicional de fuerza bruta hasta el límite estricto de la capacidad 
+  máxima ('entries_cap'). Aprovechando que la memoria se instancia limpia vía 
+  'calloc()', el destructor libera de forma idempotente cualquier ranura 
+  parcialmente asignada.
+
+------------------------------------------------------------------------------
+[Ref. L02] LA INVERSIÓN GEOMÉTRICA DE LOS HARDLINKS (Error EEXIST)
+------------------------------------------------------------------------------
+* Script de Validación: tests/suites/004_real_hardlinks.sh
+* Síntoma: El comando 'extract' o 'restore' abortaba con un error de sistema 
+  'EEXIST' al reconstruir estructuras jerárquicas complejas de enlaces duros.
+* Diagnóstico Forense: El indexador secuencial invertía el orden lógico de los 
+  inodos en ciclos masivos. El motor intentaba crear el enlace esclavo 'link()' 
+  antes de que el nodo primario con los datos físicos reales se hubiera 
+  materializado en el disco duro de destino, dejando enlaces rotos y colisiones 
+  de nombres en la RAM.
+* Resolución: Rediseño absoluto del algoritmo de restauración en dos pasadas 
+  respaldado por un bitmap dinámico 'hl_done'. Se inyectó un unlink() doble 
+  incondicional preventivo en ambas rutas para purgar residuos antiguos de 
+  ejecuciones abortadas antes de forzar la llamada de sistema simétrica.
+
+------------------------------------------------------------------------------
+[Ref. G60] EL GUARDIÁN DE RAM CONTRA EL APOCALIPSIS OOM (ZSTD Safe Fallback)
+------------------------------------------------------------------------------
+* Script de Validación: tests/suites/108_fix_o1_posix_ram_guardian_zstd_ultra_under_low_memory.sh
+* Síntoma: El proceso de creación de snapshots era exterminado de forma violenta 
+  por el Out-Of-Memory (OOM) Killer del kernel de Linux cuando el usuario configuraba 
+  niveles de compresión Ultra (niveles 20 a 22).
+* Diagnóstico Forense: Los niveles ultra de ZSTD requieren ventanas de asignación 
+  de memoria exponenciales en el Heap que saturan instantáneamente los equipos con 
+  recursos limitados (ej. portátiles clásicos con 4 GB de RAM).
+* Resolución: Implementación del 'POSIX RAM Guardian'. Al iniciar la sesión, 
+  el motor lee físicamente '/proc/meminfo' o interroga al núcleo a través de 
+  'sysconf(_SC_AVPHYS_PAGES)'. Si la memoria real disponible es inferior al 
+  umbral crítico de 600 MB, degrada automáticamente el algoritmo en caliente al 
+  nivel seguro 19, salvando el proceso de la ejecución.
+
+------------------------------------------------------------------------------
+[Ref. X54] BLINDAJE CLI POR INYECCIÓN ATÓMICA DE DESCRIPTORES (--pass-fd)
+------------------------------------------------------------------------------
+* Script de Validación: tests/suites/113_crypto_pass_fd_verification.sh
+* Síntoma: La frase de contraseña criptográfica quedaba expuesta de forma 
+  vulnerable a la vista de cualquier usuario del sistema local mediante comandos 
+  estándar de supervisión como 'ps aux', 'htop' o inspeccionando '/proc/[PID]/cmdline'.
+* Diagnóstico Forense: Pasar argumentos sensibles directamente en la matriz 
+  'argv' o delegar en variables de entorno globales persistentes expone los 
+  buffers a fugas de seguridad forense.
+* Resolución: Inyección del flag global '--pass-fd NUM' con filtrado dinámico 
+  vía 'memmove()'. Permite la inyección directa de la contraseña utilizando pipes 
+  anónimos en RAM (ej: 3<<<"$PASS"). El descriptor de archivo se marca como 
+  'FD_CLOEXEC' para evitar herencias en subprocesos y se limpia atómicamente de 
+  la memoria mediante barreras físicas '__asm__ __volatile__ ("" ::: "memory")' 
+  y 'secure_zero()' registradas en la salida 'atexit()'.
+
+------------------------------------------------------------------------------
+[Ref. T34] CORTAFUEGOS DE MUTEX ESTÁTICO PARA EL MOTOR NATIVO XDELTA3
+------------------------------------------------------------------------------
+* Script de Validación: tests/stress_asan.sh y seguimiento de compilación vía compile_tsan.sh
+* Síntoma: Fallos de segmentación intermitentes y corrupciones de memoria (Heap) durante 
+  el procesamiento masivo y concurrente de hilos de trabajo en instantáneas locales.
+* Diagnóstico Forense: Las rutinas de la biblioteca nativa 'xdelta3' no son seguras para 
+  hilos (thread-safe) por diseño arquitectónico, lo que provocaba carreras de datos destructivas 
+  en las tablas de mapeo dinámico interno al ser invocadas simultáneamente por el grupo de hilos.
+* Resolución: Se inyectó una barrera de aislamiento estricta ('pthread_mutex_t g_xd3_mutex') 
+  a nivel de módulo dentro de 'src/brs_delta.c', serializando de forma segura las rutinas 
+  'brs_delta_encode' y 'brs_delta_decode' a través de la sección crítica.
+
+------------------------------------------------------------------------------
+[Ref. V12] PUNTEROS NULOS FANTASMA EN EL CONTEXTO DE RED VFS (Almacenamiento TLS C11)
+------------------------------------------------------------------------------
+* Script de Validación: Certificación limpia de carrera de datos de ThreadSanitizer en VFS remoto
+* Síntoma: Caída errática de sesiones remotas y bloqueos del sistema mediante la 
+  desreferenciación de punteros NULL cuando los hilos de trabajo de respaldo en paralelo 
+  finalizaban sus tareas.
+* Diagnóstico Forense: Las variables de control de la red virtual (g_vfs, g_base) 
+  se asignaban en la memoria global compartida; un hilo de trabajo al terminar borraba 
+  el mapa de red activo de su hilo hermano en ejecución tras completar su ciclo.
+* Resolución: Se migraron todos los estados de enrutamiento del contexto virtual dentro de 
+  'brs_vfs_context.c' al calificador de almacenamiento nativo de hilos C11 '__thread' 
+  (Thread-Local Storage), garantizando mapas de asignación privados e aislados a través 
+  del espacio de hilos virtuales.
+
+------------------------------------------------------------------------------
+[Ref. B09] LA PÍLDORA VENENOSA ASÍNCRONA (El Cuelgue Infinito de Hilos por Ctrl+C)
+------------------------------------------------------------------------------
+* Script de Validación: tests/suites/056_power_outage_kill_9_during_prune.sh
+* Síntoma: Hilos de trabajo atrapados en segundo plano consumiendo el 100% de los ciclos 
+  de CPU de forma indefinida después de que el usuario abortara la consola mediante Ctrl+C.
+* Diagnóstico Forense: Cuando el hilo principal colapsaba la canalización abruptamente, 
+  los hilos de trabajo en segundo plano quedaban bloqueados permanentemente dentro de la 
+  rutina bloqueante 'cond_wait' de las colas SPSC debido a eventos de señalización ausentes 
+  o desincronizados.
+* Resolución: Rediseño estructural de las colas SPSC dentro de 'brs_spsc.h' inyectando un 
+  indicador '_Alignas(64) atomic_int aborted' alineado exactamente con las líneas de caché 
+  físicas de la CPU para eliminar la contención de silicio, asegurando la validación del 
+  estado de cancelación inmediatamente antes de entrar en el estado de espera.
+
+------------------------------------------------------------------------------
+[Ref. A21] EL SECUESTRO DE TTY POR ASKPASS (La Colisión de Tuberías en Ncurses)
+------------------------------------------------------------------------------
+* Script de Validación: Arquitectura interna de enrutamiento '--askpass-internal' en main.c
+* Síntoma: Congelación inmediata del teclado y corrupción de la interfaz gráfica al 
+  apuntar a repositorios remotos que requerían autenticación por contraseña dentro de la TUI.
+* Diagnóstico Forense: La secuencia de inicialización de 'ncurses' secuestraba los 
+  descriptores estándar de la terminal antes de que los canales SSH internos pudieran activar 
+  las solicitudes interactivas de credenciales, creando un callejón sin salida (deadlock) 
+  dentro del búfer de entrada de la TTY.
+* Resolución: El modo '--askpass-internal' evita los flujos estándar, interrogando al 
+  descriptor en bruto '/dev/tty' directamente mediante parámetros estrictos de 'termios' 
+  ANTES de generar cualquier ventana de ncurses, aislando limpiamente la entrada de credenciales.
+
+------------------------------------------------------------------------------
+[Ref. C44] DESBORDAMIENTO DEL IDENTIFICADOR DEL AGENTE REMOTO (El Parche de strtoull)
+------------------------------------------------------------------------------
+* Script de Validación: tests/suites/092_ssh_remote_list_with_long_names.sh
+* Síntoma: Corrupción silenciosa del mapeo de segmentos y pérdida de seguimiento de 
+  paquetes remotos en servidores de almacenamiento a gran escala.
+* Diagnóstico Forense: El analizador (parser) dentro del agente remoto (bucle 
+  'folders and files loop' en 'baresnap-remote.c') utilizaba una rutina de procesamiento 
+  'sscanf()' que provocaba desbordamientos de enteros una vez que los IDs numéricos de 
+  los archivos superaban los límites de 'LLONG_MAX'.
+* Resolución: Se reemplazó por completo la mecánica de análisis con una llamada del sistema 
+  estricta 'strtoull()' emparejada con una validación activa de desbordamientos de 'errno', 
+  devolviendo un error limpio 'ENAMETOOLONG' al cliente en lugar de transmitir valores truncados.
+
+------------------------------------------------------------------------------
+[Ref. H05] LA TABLA HASH COMPULSIVA (El OOM recursivo en index_map_grow)
+------------------------------------------------------------------------------
+* Script de Validación: tests/suites/085_index_grow_2000_small_files_without_recursive_oom.sh
+* Síntoma: Caída fulminante por Out-Of-Memory (OOM) o desbordamiento de pila 
+  justo cuando el repositorio superaba el millón de chunks indexados.
+* Diagnóstico Forense: Al expandirse la tabla hash, la función 'index_map_grow' 
+  invocaba recursivamente a 'brs_index_map_put' para reinsertar las entradas. 
+  Esto provocaba una asignación masiva de marcos de pila que devoraba la RAM [2.1].
+* Resolución: Se eliminó el factor de carga secundario y se reescribió la 
+  reinserción de forma estrictamente inline dentro del bucle de expansión, 
+  estabilizando la huella en memoria durante el crecimiento del índice [2.1].
+
+------------------------------------------------------------------------------
+[Ref. K19] EL SÍNDROME DEL BROKEN PIPE EN DEDUPLICACIÓN EN SECO (v2.1.2)
+------------------------------------------------------------------------------
+* Script de Validación: Código de retorno del packer en brs_repo_create.c 
+  (Evita llamadas si chunks = 0)
+* Síntoma: El programa abortaba con un error de sistema 'EPIPE' (Broken Pipe) 
+  al realizar backups de control que daban un 100% de deduplicación.
+* Diagnóstico Forense: Si no había chunks nuevos que procesar, el motor cerraba 
+  el empaquetador local de forma prematura. Sin embargo, la capa de red seguía 
+  esperando RPCs de sincronización sobre un canal SSH que ya había sido clausurado.
+* Resolución: Aislamiento del packer en 'brs_repo_create.c'. Si el contador de 
+  bloques nuevos es cero, se aborta el writer local limpiamente sin emitir 
+  llamadas RPC erráticas sobre el flujo de red.
+
+------------------------------------------------------------------------------
+[Ref. F01] EL RECORRIDO INCOMPLETO DE LOS HARDLINKS REMOTOS (v2.3.7)
+------------------------------------------------------------------------------
+* Script de Validación: tests/suites/004_real_hardlinks.sh 
+  (Mapeo doble y verificación de chunks_done)
+* Síntoma: El contador de progreso en el comando 'extract' superaba de forma 
+  absurda el 100% del total (ej. 22347/22335 archivos procesados).
+* Diagnóstico Forense: El algoritmo de reconstrucción de enlaces duros operaba 
+  en dos pasadas. La lógica contaba dos veces los archivos esclavos procesados 
+  en la primera pasada, inflando el contador global 'chunks_done'.
+* Resolución: Implementación de un mapa de bits dinámico ('hl_done') asignado 
+  vía 'calloc()'. Cada entrada procesada se marca físicamente, evitando la 
+  doble contabilidad en el flujo final de restauración.
+
+------------------------------------------------------------------------------
+[Ref. S15] EL CORTE DE CONEXIÓN REMOTA EN BACKUPS LARGOS (v2.2.2)
+------------------------------------------------------------------------------
+* Script de Validación: Parámetros del execlp("ssh") en brs_vfs_ssh.c
+* Síntoma: El demonio de SSH remoto mataba la conexión de forma abrupta tras 
+  varios minutos de procesamiento intensivo de chunks locales.
+* Diagnóstico Forense: El servidor SSH del destino interpretaba la falta de 
+  tráfico de control en el canal interactivo como una sesión muerta por inactividad, 
+  ignorando que el hardware local estaba saturado calculando hashes y deltas.
+* Resolución: Inyección forzada de las directivas 'ServerAliveInterval=15' y 
+  'ServerAliveCountMax=3' dentro de la llamada 'execlp()' que levanta el pipeline 
+  de SSH, manteniendo el canal de comunicación vivo en segundo plano.
+
+------------------------------------------------------------------------------
+[Ref. R07] EL PROTOCOLO DE PAUSA ELÁSTICA (Saturación de I/O en WAN)
+------------------------------------------------------------------------------
+* Script de Validación: tests/suites/051_satellite_connection_hostile_network_with_throttling.sh
+* Síntoma: Los procesos de creación de instantáneas abortaban de inmediato al 
+  alcanzar un porcentaje alto (ej. 69%) al operar sobre discos remotos lentos.
+* Diagnóstico Forense: El desbordamiento de búfer en escritura en el extremo 
+  remoto hacía que la función 'poll()' expirara, interpretándose de forma ciega 
+  como una caída definitiva de la red.
+* Resolución: Rediseño del hot path en 'brs_remote.c'. Al expirar el tiempo de 
+  espera, el motor activa un mecanismo de Backoff Exponencial Adaptativo (hasta 
+  3 reintentos), duplica el timeout e inyecta un 'usleep(2000000)' para dar 
+  oxígeno al subsistema de discos del servidor antes de reintentar la operación.
+
+------------------------------------------------------------------------------
+[Ref. E70] EL EFECTO DELOREAN (La muerte de la batería CMOS)
+------------------------------------------------------------------------------
+* Script de Validación: tests/suites/070_delorean_effect_cmos_battery_death_epoch_reset_1970.sh
+* Síntoma: En placas de desarrollo o portátiles antiguos donde la batería de 
+  la placa base moría, el orden cronológico de los backups se corrompía por 
+  completo, pisando archivos de control debido al reinicio del reloj del sistema.
+* Diagnóstico Forense: El motor dependía exclusivamente de marcas de tiempo 
+  lineales ('time_t'). Al colapsar el hardware al año 1970 (Epoch), los nombres 
+  de los archivos de instantáneas colisionaban de forma destructiva en el disco.
+* Resolución: Mutación del formato de nombres a estructuras compuestas 
+  'YYYY-MM-DD_HH-MM-SS-mmm_hash8.snap' respaldadas por identificadores únicos 
+  UUID v4 generados en caliente. El orden alfabético queda disociado del caos 
+  temporal del hardware.
+
+
+==============================================================================
+39. GLOSARIO ALFABÉTICO
 ==============================================================================
 Referencia rápida de términos técnicos usados en este manual y en el código
 fuente de BareSnap. Cada término incluye una definición concisa y, cuando
 aplica, la sección del manual donde se describe en detalle.
 
 ============================================================================
-38.1 TÉRMINOS A - B
+39.1 TÉRMINOS A - B
 ============================================================================
 A
 -
@@ -10026,7 +10329,7 @@ BRS_REMOTE_NO_SYNC
     Sección 26.10.
 
 ============================================================================
-38.2 TÉRMINOS C - D
+39.2 TÉRMINOS C - D
 ============================================================================
 C
 -
@@ -10098,7 +10401,7 @@ DUAL-CRYPTO
   seleccionables en init. Desde v2.2.0. Sección 12.
 
 ============================================================================
-38.3 TÉRMINOS E - H
+39.3 TÉRMINOS E - H
 ============================================================================
 E
 -
@@ -10170,7 +10473,7 @@ HOSTNAME
   manifiesto .snap. Sección 4.2.
 
 ============================================================================
-38.4 TÉRMINOS I - L
+39.4 TÉRMINOS I - L
 ============================================================================
 I
 -
@@ -10229,7 +10532,7 @@ LZ4
   Códec por defecto de BareSnap. Sección 7.
 
 ============================================================================
-38.5 TÉRMINOS M - P
+39.5 TÉRMINOS M - P
 ============================================================================
 M
 -
@@ -10335,7 +10638,7 @@ PWRITE
     Secciones 26 y 27.
 
 ============================================================================
-38.6 TÉRMINOS R - S
+39.6 TÉRMINOS R - S
 ============================================================================
 R
 -
@@ -10421,7 +10724,7 @@ BareSnap lo usa en --pass-fd para impedir que procesos hijo hereden el
 descriptor de la passphrase. Ver Sección 12.1.
 
 ============================================================================
-38.7 TÉRMINOS T - Z
+39.7 TÉRMINOS T - Z
 ============================================================================
 T
 -

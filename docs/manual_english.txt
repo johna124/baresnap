@@ -475,14 +475,15 @@ BARESNAP_SSH_PASSWORD="test" ./build/baresnap create ssh://test@192.168.1.2/home
 35. AI notes
 36. Program history
 37. License
-38. Alphabetical glossary
-    38.1  Terms A - B
-    38.2  Terms C - D
-    38.3  Terms E - H
-    38.4  Terms I - L
-    38.5  Terms M - P
-    38.6  Terms R - S
-    38.7  Terms T - Z
+38. Forensic engineering section: combat log and critical patches
+39. Alphabetical glossary
+    39.1  Terms A - B
+    39.2  Terms C - D
+    39.3  Terms E - H
+    39.4  Terms I - L
+    39.5  Terms M - P
+    39.6  Terms R - S
+    39.7  Terms T - Z
 
 ==============================================================================
 1. WHAT IS BARESNAP
@@ -8216,7 +8217,11 @@ in the server Heap.
 ==============================================================================
 32. CHANGELOG
 ==============================================================================
-VERSION 2.4.2
+(October 10, 2026)
+
+Documentation:
+- Added Forensic Engineering Section: Combat Log and Critical Patches
+
 (October 8, 2026)
 
 Megatest:
@@ -9265,7 +9270,7 @@ tests Well, the megatest, a beastly bash 332,938 bytes en 8650 lines
 third_party, includes the source code of aes-gcm, monocypher, ncurses-6.5, xdelta, and zstd
 
 docs, the PDF and TXT manual, what you are reading now, a "bible" of 
-173 pages with 216 bookmarks and 216 internal links.
+178 pages with 217 bookmarks and 217 internal links.
 
 
 Scripts_compilers, explained above assets, Some Lore, not as beastly as 
@@ -9385,7 +9390,7 @@ risk or consider deployment in controlled environments.
 ###############################################################################
 FORENSIC ALERT: ENTROPY CONTROL IN DOCUMENTATION
 ###############################################################################
-This technical manual consists of 173 pages, 216 markers, and 216 internal 
+This technical manual consists of 178 pages, 217 markers, and 217 internal 
 binary links generated natively from plain text by 'txt2pdf'. However, 
 the user and engineer must process this text with technical criteria:
 
@@ -9767,7 +9772,7 @@ up and tells you: "Let’s leave it at that, let’s talk about something else."
 
 Now, with this new final version (v2.4.2), I look back and realize everything 
 started just 40 days ago. Today we have our own lore, debugging logs worthy of 
-Sherlock Holmes, a massive manual spanning over 173 pages, and a backup utility 
+Sherlock Holmes, a massive manual spanning over 178 pages, and a backup utility 
 featuring double encryption, double compression, local xdelta3, integrated VFS 
 over SSH, a TUI interface, and a battery of nearly 1,000 tests—amounting to 18,473 
 lines of pure C across 824,103 bytes of source code.
@@ -9783,7 +9788,7 @@ in the assets directory.
 
 
 ==============================================================================
-38. LICENSE
+37. LICENSE
 ==============================================================================
 
 This project is under the **GNU General Public License v3.0 (GPLv3)**.
@@ -9800,14 +9805,294 @@ Foundation; with no Invariant Sections, no Front-Cover Texts, and
 no Back-Cover Texts.
 
 ==============================================================================
-38. ALPHABETICAL GLOSSARY
+38. FORENSIC ENGINEERING SECTION: COMBAT LOG AND CRITICAL PATCHES
+==============================================================================
+
+To survive the iteration carnicería triggered by free-tier LLM development, 
+the human supervision framework enforced a hostile verification pipeline 
+backed by 115 regression tests. This section logs the exact hardware mismatches, 
+algorithmic hallucinations, and architectural betrayals neutralized on real metal. 
+There is no faith here; only physical data.
+
+------------------------------------------------------------------------------
+[Ref. M16] THE INODE PHANTOM SYNDROME ON MIPS64 (Big Endian Mismatch)
+------------------------------------------------------------------------------
+* Validation Script: tests/suites/109_fix_m1_corrupt_parse_without_leaks_or_crash_goto_parse_error.sh
+* Symptom: After a successful 'init' command under Argon2id encryption, the 
+  engine systematically rejected the valid passphrase during subsequent 
+  'create' operations, throwing a critical "incorrect passphrase" error. 
+  The failure only materialized under MIPS64 Big Endian architectures (QEMU).
+* Forensic Diagnosis: The 'config.algorithm' field in 'brs_argon2_derive()' 
+  was left uninitialized in stack memory. On Little Endian PCs, the stack garbage 
+  fell into neutral zones, but on Big Endian it mutated the struct layout geometry, 
+  injecting corrupt bytes into the key derivation pipeline.
+* Resolution: Explicit and unconditional initialization of the structure to 
+  'CRYPTO_ARGON2_ID' inside 'src/brs_init.c'. Symmetric alignment restored.
+
+------------------------------------------------------------------------------
+[Ref. S23] THE ATOMIC EVACUATION OF THE TUI (The Musl Exit Segfault)
+------------------------------------------------------------------------------
+* Validation Script: tests/valgrind_tui.sh and exit routines in main.c
+* Symptom: Upon closing the interactive terminal user interface (TUI) via 
+  F10/Ctrl+Q, the static stripped binary threw a random 'SEGV_MAPERR' 
+  segmentation fault exclusively when compiled against the 'musl-libc' library.
+* Forensic Diagnosis: Musl's native Thread-Local Storage (TLS) destructors 
+  executed automatic 'munmap()' calls on memory segments allocated to 'libssh2' 
+  and 'ncurses' before the host process formally dismantled its worker threads.
+* Resolution: Extirpation of the standard libc exit routine. Implemented a 
+  6-phase asynchronous shutdown sequence that terminates destructively and 
+  immediately via the '_exit(0)' system call, bypassing musl's zombie 
+  destructors before they can corrupt the virtual memory map.
+
+------------------------------------------------------------------------------
+[Ref. C08] THE ENTROPY FIREWALL (The Burned CPU Core Syndrome)
+------------------------------------------------------------------------------
+* Validation Script: tests/suites/082_entropy_firewall_automatic_zstd_bypass.sh
+* Symptom: Critical performance drop and thermal overheating of the 2007 
+  Intel Core 2 Duo processor when scanning massive collections of pre-compressed 
+  or multimedia files.
+* Forensic Diagnosis: Forcing white noise (high physical entropy data like .zip, 
+  .tar.gz, or .mp4) through heavy compression pipelines (LZ4/ZSTD) is a massive 
+  waste of CPU clock cycles. The LLM engine blindly insisted on executing 
+  symmetric processing across the entire payload by default.
+* Resolution: Injected the inline 'brs_is_chunk_incompressible()' function 
+  into the chunker's hot path. The engine evaluates the math on the first blocks; 
+  if entropy passes the critical threshold, it shuts down the ZSTD module 
+  on the fly and streams the raw block straight to the pack assembler, 
+  drastically saving RAM and CPU cycles.
+
+------------------------------------------------------------------------------
+[Ref. R34] THE BLIND READAHEAD RPC STORM (SSH Latency Shock)
+------------------------------------------------------------------------------
+* Validation Script: tests/suites/048_ssh_full_remote_cycle_40_tests.sh
+* Symptom: Demoras de más de 32 segundos por snapshot sobre conexiones WAN remotas, 
+  manteniendo el ancho de banda del canal SSH completamente infrautilizado.
+* Forensic Diagnosis: Se implementó una ventana de lectura anticipada (readahead) 
+  de 1 MiB en la capa VFS sobre SSH para optimizar la red. Esto provocó la descarga 
+  ciega de 271 MB de datos adyacentes redundantes que jamás se llegaron a usar debido 
+  a la dispersión física de los chunks deduplicados en los packs.
+* Resolution: Eliminación radical del readahead ciego estableciendo 'BRS_SSH_READ_WINDOW=0'. 
+  Como el sistema de backup requiere precisión, pedir únicamente los bytes exactos 
+  solicitados redujo el flujo a 1,501 RPCs y recortó los tiempos de restauración en 
+  más del 50% sin desperdiciar ancho de banda.
+
+------------------------------------------------------------------------------
+[Ref. G11] THE ANTI-MUTATION SHIELD IN GOTO PARSE_ERROR (Valgrind Audit)
+------------------------------------------------------------------------------
+* Validation Script: tests/suites/105_valgrind_extreme_torture_impossible_dedup_500_unique.sh
+* Symptom: AddressSanitizer and Valgrind detected persistent memory leaks (up to 1.5 MB 
+  of Heap leaks) when reading a corrupt snapshot failed midway and jumped to the error handler.
+* Forensic Diagnosis: The deallocator for `BrsParsedSnapshot` in `brs_manifest.c` (Phase 4) 
+  blindly relied on the dynamic counter `entries_len` generated by the AI. If corruption occurred 
+  in the intermediate offsets, the misaligned counter completely ignored structural blocks already allocated.
+* Resolution: Absolute redesign of the cleanup flow utilizing an unconditional brute-force sweep up 
+  to the strict capacity limit (`entries_cap`). Since the memory is instantiated clean via `calloc()`, 
+  the destructor idempotently frees any partially assigned slot. Injected a preventive mechanism in 
+  `scan_symlink` to fallback to point (".") and size 1 if `readlink()` fails, neutralizing master loop aborts.
+
+------------------------------------------------------------------------------
+[Ref. L02] THE GEOMETRIC INVERSION OF HARDLINKS (System EEXIST Error)
+------------------------------------------------------------------------------
+* Validation Script: tests/suites/004_real_hardlinks.sh
+* Symptom: Complete abort of 'extract' or 'restore' commands throwing an 
+  'EEXIST' system error when reconstructing complex, nested hardlink graphs.
+* Forensic Diagnosis: The sequential indexer inverted the logical sorting 
+  of inodes in massive batches. The engine attempted to invoke the 'link()' 
+  system call on a slave file before the primary node holding the real 
+  physical data blocks had been materialized on the target disk drive, leaving residual name collisions.
+* Resolution: Absolute redesign of the restoration loop into a two-pass layout 
+  backed by a dynamic 'hl_done' bitmap allocated via 'calloc()'. Injected 
+  an unconditional double preventive unlink() on both paths to purge 
+  residual files from aborted jobs before forcing the symmetric system call.
+
+------------------------------------------------------------------------------
+[Ref. G60] THE RAM GUARDIAN AGAINST THE OOM APOCALYPSE (ZSTD Safe Fallback)
+------------------------------------------------------------------------------
+* Validation Script: tests/suites/108_fix_o1_posix_ram_guardian_zstd_ultra_under_low_memory.sh
+* Symptom: The snapshot execution pipeline was violently terminated by Linux's 
+  Out-Of-Memory (OOM) Killer when operating under ZSTD Ultra settings (levels 20-22).
+* Forensic Diagnosis: ZSTD Ultra allocation windows demand exponential memory 
+  structures in the Heap, instantly saturating hardware with strict physical 
+  limitations (such as our 4 GB RAM development laptop).
+* Resolution: Implemented the 'POSIX RAM Guardian'. At session startup, the engine 
+  reads '/proc/meminfo' or queries the kernel via 'sysconf(_SC_AVPHYS_PAGES)'. 
+  If available real memory drops below the 600 MB critical threshold, it 
+  automatically downgrades the algorithm on the fly to safe level 19 
+  (BRS_ZSTD_SAFE_LEVEL), saving the process from execution.
+
+------------------------------------------------------------------------------
+[Ref. X54] CLI BLINDAJE BY ATOMIC DESCRIPTOR INJECTION (--pass-fd)
+------------------------------------------------------------------------------
+* Validation Script: tests/suites/113_crypto_pass_fd_verification.sh
+* Symptom: Forensic exposure and leakage of the cryptographic passphrase in 
+  plaintext across global process monitors ('ps aux', 'htop', or '/proc/[PID]/cmdline').
+* Forensic Diagnosis: Storing credentials persistently inside the 'argv' 
+  argument matrix exposes sensitive memory buffers to multi-user environments. 
+  The IA completely ignored runtime isolation boundaries when parsing subcommands.
+* Resolution: Injected the global '--pass-fd NUM' flag with dynamic filtering 
+  via 'memmove()'. It enables direct passphrase injection using anonymous RAM pipes 
+  (e.g., 3<<<"$PASS"). The file descriptor is marked as 'FD_CLOEXEC' to prevent 
+  inheritance in child processes and is physically destroyed from memory using 
+  '__asm__ __volatile__ ("" ::: "memory")' barriers and 'secure_zero()' 
+  registered inside 'atexit()'.
+
+------------------------------------------------------------------------------
+[Ref. T34] STATIC MUTEX FIREWALL FOR THE NATIVE XDELTA3 ENGINE
+------------------------------------------------------------------------------
+* Validation Script: tests/stress_asan.sh and compile tracking via compile_tsan.sh
+* Symptom: Intermittent segmentation faults and Heap corruptions during mass 
+  concurrent worker thread processing on local snapshots.
+* Forensic Diagnosis: The native 'xdelta3' library routines are not thread-safe 
+  by architecture, leading to destructive data races on internal dynamic 
+  mapping tables when invoked concurrently by the thread pool.
+* Resolution: Injected a strict isolation barrier ('pthread_mutex_t g_xd3_mutex') 
+  at module-level inside 'src/brs_delta.c', safely serializing 'brs_delta_encode' 
+  and 'brs_delta_decode' routines across the critical section.
+
+------------------------------------------------------------------------------
+[Ref. V12] GHOST NULL POINTERS IN VFS NETWORK CONTEXT (C11 TLS Storage)
+------------------------------------------------------------------------------
+* Validation Script: ThreadSanitizer data-race clean certification on remote VFS
+* Symptom: Erratic dropping of remote sessions and crashes via NULL pointer 
+  dereferencing when parallel backup workers finalized tasks.
+* Forensic Diagnosis: Virtual network control variables (g_vfs, g_base) 
+  were allocated in shared global memory; a terminating worker thread wiped out 
+  the active network map of its running sibling upon completing its execution.
+* Resolution: Migrated all virtual context routing state inside 'brs_vfs_context.c' 
+  to the native C11 thread storage qualifier '__thread' (Thread-Local Storage), 
+  guaranteeing private, isolated allocation maps across the virtual thread space.
+
+------------------------------------------------------------------------------
+[Ref. B09] THE ASYNCHRONOUS POISON PILL (The Ctrl+C Infinite Thread Hang)
+------------------------------------------------------------------------------
+* Validation Script: tests/suites/056_power_outage_kill_9_during_prune.sh
+* Symptom: Worker threads trapped in the background consuming 100% CPU cycles 
+  indefinitively after the user aborted the console via Ctrl+C.
+* Forensic Diagnosis: When the main thread collapsed the pipeline abruptly, 
+  background workers became permanently locked inside the blocking 'cond_wait' 
+  routine of the SPSC queues due to missing or out-of-sync signaling events.
+* Resolution: Structural redesign of the SPSC queues inside 'brs_spsc.h' 
+  by injecting an '_Alignas(64) atomic_int aborted' flag aligned exactly to 
+  the CPU physical cache lines to eliminate silicon contention, ensuring 
+  cancel state validation immediately before entering the wait state.
+
+------------------------------------------------------------------------------
+[Ref. A21] THE ASKPASS TTY HIJACK (The Ncurses Pipe Collision)
+------------------------------------------------------------------------------
+* Validation Script: Internal '--askpass-internal' routing architecture in main.c
+* Symptom: Immediate keyboard freeze and graphical interface corruption upon 
+  targeting remote repositories that required password authentication inside the TUI.
+* Forensic Diagnosis: The initialization sequence of 'ncurses' hijacked the 
+  standard terminal descriptors before the internal SSH channels could trigger 
+  interactive credential requests, creating a deadlock inside the TTY input buffer.
+* Resolution: The '--askpass-internal' mode bypasses standard streams, 
+  interrogating the raw descriptor '/dev/tty' directly via strict 'termios' 
+  parameters BEFORE spawning any ncurses windows, isolating credential input cleanly.
+
+------------------------------------------------------------------------------
+[Ref. C44] REMOTE AGENT IDENTIFIER OVERFLOW (The strtoull Patch)
+------------------------------------------------------------------------------
+* Validation Script: tests/suites/092_ssh_remote_list_with_long_names.sh
+* Symptom: Silent corruption of segment mapping and loss of tracking of remote 
+  packs on large storage servers.
+* Forensic Diagnosis: The parser inside the remote agent ('folders and files loop' 
+  in 'baresnap-remote.c') utilized an 'sscanf()' processing routine that triggered 
+  integer overflows once file numerical IDs crossed past 'LLONG_MAX' boundaries.
+* Resolution: Replaced the parsing mechanics completely with a strict 'strtoull()' 
+  system call paired with an active validation of 'errno' overflows, returning a 
+  clean 'ENAMETOOLONG' error to the client instead of streaming truncated values.
+
+------------------------------------------------------------------------------
+[Ref. H05] THE COMPULSIVE HASH TABLE (The Recursive OOM in index_map_grow)
+------------------------------------------------------------------------------
+* Validation Script: tests/suites/085_index_grow_2000_small_files_without_recursive_oom.sh
+* Symptom: Sudden Out-Of-Memory (OOM) crash or stack overflow exactly when the 
+  repository exceeded one million indexed chunks.
+* Forensic Diagnosis: Upon expanding the hash table, the 'index_map_grow' function 
+  recursively invoked 'brs_index_map_put' to reinsert entries. This triggered a 
+  massive allocation of stack frames that devoured the RAM [2.1].
+* Resolution: Eliminated the secondary load factor and rewrote the reinsertion 
+  to be strictly inline within the expansion loop, stabilizing the memory footprint 
+  during index growth [2.1].
+
+------------------------------------------------------------------------------
+[Ref. K19] THE DRY DEDUPLICATION BROKEN PIPE SYNDROME (v2.1.2)
+------------------------------------------------------------------------------
+* Validation Script: Packer return code inside brs_repo_create.c 
+  (Bypasses calls if chunks = 0)
+* Symptom: The program aborted with an 'EPIPE' (Broken Pipe) system error 
+  when performing control backups that yielded 100% deduplication.
+* Forensic Diagnosis: If there were no new chunks to process, the engine closed 
+  the local packer prematurely. However, the network layer kept waiting for 
+  synchronization RPCs over an SSH channel that had already been shut down.
+* Resolution: Isolated the packer inside 'brs_repo_create.c'. If the new blocks 
+  counter is zero, the local writer is aborted cleanly without emitting erratic 
+  RPC calls over the network stream.
+
+------------------------------------------------------------------------------
+[Ref. F01] THE INCOMPLETE TRAVERSAL OF REMOTE HARDLINKS (v2.3.7)
+------------------------------------------------------------------------------
+* Validation Script: tests/suites/004_real_hardlinks.sh 
+  (Double mapping and chunks_done verification)
+* Symptom: The progress counter in the 'extract' command absurdly exceeded 
+  100% of the total (e.g., 22347/22335 files processed).
+* Forensic Diagnosis: The hardlink reconstruction algorithm operated in two 
+  passes. The logic double-counted slave files processed during the first pass, 
+  inflating the global 'chunks_done' counter.
+* Resolution: Implemented a dynamic bitmap ('hl_done') allocated via 'calloc()'. 
+  Each processed entry is physically marked, preventing double accounting in the 
+  final restoration flow.
+
+------------------------------------------------------------------------------
+[Ref. S15] THE REMOTE DISCONNECT ON LONG BACKUPS (v2.2.2)
+------------------------------------------------------------------------------
+* Validation Script: Parameters of execlp("ssh") inside brs_vfs_ssh.c
+* Symptom: The remote SSH daemon abruptly killed the connection after several 
+  minutes of intensive local chunk processing.
+* Forensic Diagnosis: The target SSH server interpreted the lack of control 
+  traffic on the interactive channel as an idle session, ignoring that the 
+  local hardware was fully saturated computing hashes and deltas.
+* Resolution: Forced injection of the 'ServerAliveInterval=15' and 
+  'ServerAliveCountMax=3' directives inside the 'execlp()' call that spawns 
+  the SSH pipeline, keeping the communication channel alive in the background.
+
+------------------------------------------------------------------------------
+[Ref. R07] THE ELASTIC PAUSE PROTOCOL (I/O Saturation over WAN)
+------------------------------------------------------------------------------
+* Validation Script: tests/suites/051_satellite_connection_hostile_network_with_throttling.sh
+* Symptom: Snapshot creation processes aborted immediately upon reaching a high 
+  percentage (e.g., 69%) when operating on slow remote disks.
+* Forensic Diagnosis: The write buffer overflow on the remote endpoint caused 
+  the 'poll()' function to time out, which was blindly interpreted as a definitive 
+  network failure.
+* Resolution: Redesign of the hot path inside 'brs_remote.c'. Upon timeout, 
+  the engine triggers an Adaptive Exponential Backoff mechanism (up to 3 retries), 
+  doubles the timeout duration, and injects a 'usleep(2000000)' to give the server's 
+  disk subsystem breathing room before retrying the operation.
+
+------------------------------------------------------------------------------
+[Ref. E70] THE DELOREAN EFFECT (CMOS Battery Death)
+------------------------------------------------------------------------------
+* Validation Script: tests/suites/070_delorean_effect_cmos_battery_death_epoch_reset_1970.sh
+* Symptom: On development boards or old laptops where the motherboard battery died, 
+  the chronological order of the backups was completely corrupted, overwriting 
+  control files due to the system clock reset.
+* Forensic Diagnosis: The engine relied exclusively on linear timestamps ('time_t'). 
+  When the hardware collapsed back to the year 1970 (Epoch), the snapshot filenames 
+  collided destructively on disk.
+* Resolution: Mutated the naming format into composite 'YYYY-MM-DD_HH-MM-SS-mmm_hash8.snap' 
+  structures backed by on-the-fly generated UUID v4 unique identifiers. Alphabetical 
+  ordering is now decoupled from hardware time chaos.
+
+==============================================================================
+39. ALPHABETICAL GLOSSARY
 ==============================================================================
 Quick reference of technical terms used in this manual and in BareSnap's source 
 code. Each term includes a concise definition and, when applicable, the 
 manual section where it is described in detail.
 
 ============================================================================
-38.1 TERMS A - B
+39.1 TERMS A - B
 ============================================================================
 A
 -
@@ -9897,7 +10182,7 @@ BRS_REMOTE_NO_SYNC
     Section 26.10.
 
 ============================================================================
-38.2 TERMS C - D
+39.2 TERMS C - D
 ============================================================================
 C
 -
@@ -9969,7 +10254,7 @@ DUAL-CRYPTO
   selectable at init. Since v2.2.0. Section 12.
 
 ============================================================================
-38.3 TERMS E - H
+39.3 TERMS E - H
 ============================================================================
 E
 -
@@ -10041,7 +10326,7 @@ HOSTNAME
   .snap manifest. Section 4.2.
 
 ============================================================================
-38.4 TERMS I - L
+39.4 TERMS I - L
 ============================================================================
 I
 -
@@ -10100,7 +10385,7 @@ LZ4
   BareSnap default codec. Section 7.
 
 ============================================================================
-38.5 TERMS M - P
+39.5 TERMS M - P
 ============================================================================
 M
 -
@@ -10213,7 +10498,7 @@ PWRITE
     Sections 26 and 27.
 
 ============================================================================
-38.6 TERMS R - S
+39.6 TERMS R - S
 ============================================================================
 R
 -
@@ -10299,7 +10584,7 @@ BareSnap uses it in --pass-fd to prevent child processes from inheriting
 passphrase descriptor. See Section 12.1.
 
 ============================================================================
-38.7 TERMS T - Z
+39.7 TERMS T - Z
 ============================================================================
 T
 -
