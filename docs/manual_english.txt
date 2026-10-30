@@ -264,226 +264,226 @@ BARESNAP_SSH_PASSWORD="test" ./build/baresnap create ssh://test@192.168.1.2/home
 [TOC] TABLE OF CONTENTS
 ==============================================================================
 
-1.  What is baresnap
-2.  Engine architecture
-    2.0a Logical order of the processing pipeline (create)
-    2.0b SSH handshake diagram (remote vfs)
-    2.0c Concurrency diagram (multithreaded pipeline)
-    2.1  Engine modularization (refactor performed)
-    2.2  I/O retry in restore (transient fault tolerance)
-    2.3  SSH authentication with password (internal askpass)
-    2.4  Agent sudden death management (anti-deadlock mechanism)
-    2.5  Thread-local pack cache (SSH performance optimization)
-    2.6  Elimination of hot path route health check
-    2.7  Info command optimization
-    2.8  File cache self-healing (cache healing)
-    2.9  SSH local index cache (new in v2.1.4)
-    2.10 Disabling delta encoding over SSH (new in v2.1.4)
-    2.11 Optimized write-back batching (new in v2.1.4)
-    2.12 Local temporary pack + mass upload (new in v2.1.4)
-    2.13 Elimination of redundant fsyncs (new in v2.1.4)
-    2.14 SSH RPCs diagnosis (new in v2.1.4)
-    2.15 SSH: keepalive and network statistics (v2.2.2)
-    2.16 Inconsistent repo detection and config recovery (v2.2.2)
-    2.17 Purging zombie temporaries in health --repair (v2.2.2)
-    2.18 Compilation Scripts
-    2.18.1 compile.sh (PRODUCTION)
-    2.18.2 compile_dbg.sh (DEBUG)
-    2.18.3 compile_asan.sh (MEMORY AUDIT)
-    2.18.4 compile_tsan.sh (CONCURRENCY AUDIT)
-    2.18.5 compile_arm64.sh (CROSS-COMPILE ARM64)
-    2.18.6 compile_i686.sh (LEGACY x86 32-BIT COMPILATION)
-    2.18.7 compile_mips64.sh (CROSS-COMPILE MIPS64)
-    2.18.8 compile_ppc32.sh (CROSS-COMPILE POWERPC 32-BIT)
-    2.18.9 compile_riscv.sh (CROSS-COMPILE RISC-V)
-    2.18.10 Common Patterns in the Compilation Suite
-    2.18.11 Typical Development Workflow
-    2.18.12 Real-World Benchmarks: Zstd vs Lz4
-3.  Repository structure on disk
-4.  Binary format
-    4.1 Packs binary format (.Pack)
-    4.2 Snapshots binary format (.Snap)
-    4.3 Index segments binary format (.Idx)
-    4.4 Bloom filters binary format (.Blm)
-    4.5 Configuration binary format (config)
-    4.6 File cache binary format (cache)
-5.  Delta encoding with xdelta3
-    5.1 Creation flow
-    5.2 Activation criteria
-    5.3 Delta over SSH
-    5.4 Snapshot storage
-    5.5 Restoration
-    5.6 Delta pipeline
-    5.7 Important notes
-6.  Bloom Filter and Index Lazy Loading
-    6.1 What is the Bloom Filter?
-    6.2 Current Parameters
-    6.3 Loading Flow
-    6.4 Per-Segment Bloom Filter
-    6.5 .blm Format
-    6.6 Important Notes
-    6.7 Performance
-7.  Zstd Compression and Mixed Codecs (Per-Chunk Decision)
-    7.1 Chunk Flags
-    7.2 Per-Chunk Decision
-    7.3 Entropy Firewall
-    7.4 LZ4 + Zstd Coexistence in the Same Repo
-    7.5 Zstd Levels
-    7.6 Environment Variables
-    7.7 SSH Note
-    7.8 Flags Summary
-8.  CLI - Command Reference
-    8.1 Auto-Init
-    8.2 Encryption and Passphrase Automation
-    8.3 Snapshot Resolution by Prefix
-    8.4 Health: Anomaly Verification and Repair
-    8.5 Hash Selection: FNV1A or BLAKE2B
-9.  GUI - yad (shell)
-10. Tui - ncurses
-    10.1 Interaction architecture and concurrency control
-    10.2 Multithreaded transport isolation (vfs sandbox)
-    10.3 Memory allocation: heap vs stack
-    10.4 Remote virtual synchronization in empty repositories
-    10.5 Diagnostics and error codes
-    10.6 Absolute Path Resolution in Virtual Decompression (F6)
-    10.7 Static Metadata Reuse (Byte Sizes without CPU Load)
-11. Code quality and coverage (947)
-    11.1  Build and compilation
-    11.2  Regression test battery
-    11.3  SSH chaos monkey (intermittent micro-network cuts)
-    11.4  Enospc: disk space failure
-    11.5  Extreme concurrency (append-only)
-    11.6  Satellite connection (hostile network)
-    11.7  Power outage: kill -9 during prune
-    11.8  Bit rot injection (crc32c detection)
-    11.9  Pack uniqueness guarantee (64-bit ID)
-    11.10 Post-prune audit (idx/pack consistency)
-    11.11 Ghost permission: chmod 000 midway through create
-    11.12 Memory analysis (valgrind / asan)
-    11.13 Performance (v2.4.1 final validation metrics)
-    11.14 Certification summary
-12. Security
-    12.1 RAM defenses: memory firewalls in the engine
-13. Limits and constants
-    13.1 Session environment variables (new in v2.3.0)
-    13.1b Safeguard environment variables (new in v2.3.5)
-    13.2 SSH environment variables (v2.1.4 / v2.2.2)
-14. Environment control variables (v2.3.0/v2.2.2)
-15. Possible issues
-    15.1 False positive control in bloom filter
-16. Design philosophy
-    16.1 Conscious architectural limitations
-17. Edge cases and memory limits (edge cases)
-    17.1 Structural analysis of the "Frankenstein repo"
-18. Optimization paths (roadmap)
-19. Tui demos
-20. Best practices for cron and production automation
-    20.1 Volatile credentials protocol (ram-only)
-    20.2 Basic script: daily backup with log
-    20.3 Complete script: backup + verify + prune + alerts
-    20.4 Log rotation with logrotate
-    20.5 Alerts if verify fails (without complete script)
-    20.6 Monitoring with nagios / zabbix / Prometheus
-    20.7 Backup to nas / USB disk with retry
-    20.8 Complete cron entries (copy and paste)
-    20.9 Production checklist
-21. Comparison with other backup tools
-22. FAQ - what it can and cannot do (frequently asked questions)
-    22.1  Can I use baresnap with SSH?
-    22.2  Can I backup to the cloud (S3, b2, gcs)?
-    22.3  Can I mix lz4 and zstd in the same repository?
-    22.4  How does the engine detect what compression each chunk USES?
-    22.5  Can I change the compression of AN existing repo?
-    22.6  What happens if there is A power outage during A backup?
-    22.7  Can I restore A single file?
-    22.8  Does it work on windows or mac?
-    22.9  What happens if I forget the passphrase?
-    22.10 Can I backup A complete disk (block device)?
-    22.11 How much space does the repo need?
-    22.12 Can I run baresnap from A rescue livecd?
-    22.13 Can I use baresnap as a backup server for multiple machines?
-    22.14 Why are SSH backups so fast?
-23. SSH remote backend (vfs and lightweight agent)
-    23.1 Architecture
-    23.2 Authentication
-    23.3 Pack Uploads in v2.3.8
-    23.4 Existing Pack Verification
-    23.5 Maintained SSH Optimizations
-    23.6 Advantages over SFTP
-    23.7 Requirements
-    23.8 Packer Isolation Against Total Deduplication
-    23.9 Concurrency and Fine-Grained Mutexes
-    23.10 Elastic pause protocol for disk saturation (new in v2.3.6)
-24. Resilience and performance
-25. C11 engine API reference
-    25.1  BASE types and constants
-    25.2  KVV (key verification value)
-    25.3  Format magics
-    25.4  Flags
-    25.5  Delta encoding
-    25.6  Argon2 KDF
-    25.7  Operational limits
-    25.8  Enums
-    25.9  Structures
-    25.10 Support functions
-    25.11 Stable public repository API
-    25.12 Progress and cancellation callback
-    25.13 Data commands (create, restore, extract)
-    25.14 Verification commands (verify, info, diff)
-    25.15 Management commands (list, prune, load_key, ls)
-    25.16 Index and bloom filters
-    25.17 Dynamic buffer
-    25.18 Filesystem utilities
-    25.19 Fastcdc and streaming chunker
-26. Remote agent (baresnap-remote)
-    26.1  Overview
-    26.2  Architecture and data structure
-    26.3  Main loop
-    26.4  Handle management
-    26.5  Path validation and confinement
-    26.5a snprintf validation in handle_list (FIX v2.3.0)
-    26.6  POSIX operation handlers
-    26.7  Smart SSH protocol v2 (sync_index, upload_pack)
-    26.8  Close message
-    26.9  Main dispatch
-    26.10 Agent environment variables
-    26.11 Security considerations
-    26.12 Installation and usage
-    26.13 Diagnostics and common errors
-27. SSH binary protocol
-    27.1  Protocol overview
-    27.2  Header format (6 bytes)
-    27.3  Message types (client -> server)
-    27.4  Response types (server -> client)
-    27.5  Open flags
-    27.6  Payload formats per message
-    27.7  Smart SSH protocol v2 (sync_index, upload_pack)
-    27.8  Dev error format
-    27.9  Protocol v3 (high level)
-    27.10 Timeout and retries
-    27.11 Typical message sequences (create, restore, verify)
-    27.12 Client functions (brs_remote)
-    27.13 Protocol environment variables
-    27.14 Wire format: hex examples of RPC messages
-28. Security Audit and Applied Fixes (v2.3.4)
-29. Progress bars in CLI creation and extraction
-30. Mandatory requirement for TUI navigation under SSH
-31. Persistence of the post-extraction SSH channel (f6) in the TUI
-32. Changelog
-33. Program metrics
-34. Author's notes
-35. AI notes
-36. Program history
-37. License
-38. Forensic engineering section: combat log and critical patches
-39. Alphabetical glossary
-    39.1  Terms A - B
-    39.2  Terms C - D
-    39.3  Terms E - H
-    39.4  Terms I - L
-    39.5  Terms M - P
-    39.6  Terms R - S
-    39.7  Terms T - Z
+1.What is baresnap
+2.Engine architecture
+  2.0a Logical order of the processing pipeline (create)
+  2.0b SSH handshake diagram (remote vfs)
+  2.0c Concurrency diagram (multithreaded pipeline)
+  2.1  Engine modularization (refactor performed)
+  2.2  I/O retry in restore (transient fault tolerance)
+  2.3  SSH authentication with password (internal askpass)
+  2.4  Agent sudden death management (anti-deadlock mechanism)
+  2.5  Thread-local pack cache (SSH performance optimization)
+  2.6  Elimination of hot path route health check
+  2.7  Info command optimization
+  2.8  File cache self-healing (cache healing)
+  2.9  SSH local index cache (new in v2.1.4)
+  2.10 Disabling delta encoding over SSH (new in v2.1.4)
+  2.11 Optimized write-back batching (new in v2.1.4)
+  2.12 Local temporary pack + mass upload (new in v2.1.4)
+  2.13 Elimination of redundant fsyncs (new in v2.1.4)
+  2.14 SSH RPCs diagnosis (new in v2.1.4)
+  2.15 SSH: keepalive and network statistics (v2.2.2)
+  2.16 Inconsistent repo detection and config recovery (v2.2.2)
+  2.17 Purging zombie temporaries in health --repair (v2.2.2)
+  2.18 Compilation Scripts
+  2.18.1 compile.sh (PRODUCTION)
+  2.18.2 compile_dbg.sh (DEBUG)
+  2.18.3 compile_asan.sh (MEMORY AUDIT)
+  2.18.4 compile_tsan.sh (CONCURRENCY AUDIT)
+  2.18.5 compile_arm64.sh (CROSS-COMPILE ARM64)
+  2.18.6 compile_i686.sh (LEGACY x86 32-BIT COMPILATION)
+  2.18.7 compile_mips64.sh (CROSS-COMPILE MIPS64)
+  2.18.8 compile_ppc32.sh (CROSS-COMPILE POWERPC 32-BIT)
+  2.18.9 compile_riscv.sh (CROSS-COMPILE RISC-V)
+  2.18.10 Common Patterns in the Compilation Suite
+  2.18.11 Typical Development Workflow
+  2.18.12 Real-World Benchmarks: Zstd vs Lz4
+3.Repository structure on disk
+4.Binary format
+  4.1 Packs binary format (.Pack)
+  4.2 Snapshots binary format (.Snap)
+  4.3 Index segments binary format (.Idx)
+  4.4 Bloom filters binary format (.Blm)
+  4.5 Configuration binary format (config)
+  4.6 File cache binary format (cache)
+5.Delta encoding with xdelta3
+  5.1 Creation flow
+  5.2 Activation criteria
+  5.3 Delta over SSH
+  5.4 Snapshot storage
+  5.5 Restoration
+  5.6 Delta pipeline
+  5.7 Important notes
+6.Bloom Filter and Index Lazy Loading
+  6.1 What is the Bloom Filter?
+  6.2 Current Parameters
+  6.3 Loading Flow
+  6.4 Per-Segment Bloom Filter
+  6.5 .blm Format
+  6.6 Important Notes
+  6.7 Performance
+7.Zstd Compression and Mixed Codecs (Per-Chunk Decision)
+  7.1 Chunk Flags
+  7.2 Per-Chunk Decision
+  7.3 Entropy Firewall
+  7.4 LZ4 + Zstd Coexistence in the Same Repo
+  7.5 Zstd Levels
+  7.6 Environment Variables
+  7.7 SSH Note
+  7.8 Flags Summary
+8.CLI - Command Reference
+  8.1 Auto-Init
+  8.2 Encryption and Passphrase Automation
+  8.3 Snapshot Resolution by Prefix
+  8.4 Health: Anomaly Verification and Repair
+  8.5 Hash Selection: FNV1A or BLAKE2B
+9.GUI - yad (shell)
+10.Tui - ncurses
+   10.1 Interaction architecture and concurrency control
+   10.2 Multithreaded transport isolation (vfs sandbox)
+   10.3 Memory allocation: heap vs stack
+   10.4 Remote virtual synchronization in empty repositories
+   10.5 Diagnostics and error codes
+   10.6 Absolute Path Resolution in Virtual Decompression (F6)
+   10.7 Static Metadata Reuse (Byte Sizes without CPU Load)
+11.Code quality and coverage (947)
+   11.1  Build and compilation
+   11.2  Regression test battery
+   11.3  SSH chaos monkey (intermittent micro-network cuts)
+   11.4  Enospc: disk space failure
+   11.5  Extreme concurrency (append-only)
+   11.6  Satellite connection (hostile network)
+   11.7  Power outage: kill -9 during prune
+   11.8  Bit rot injection (crc32c detection)
+   11.9  Pack uniqueness guarantee (64-bit ID)
+   11.10 Post-prune audit (idx/pack consistency)
+   11.11 Ghost permission: chmod 000 midway through create
+   11.12 Memory analysis (valgrind / asan)
+   11.13 Performance (v2.4.1 final validation metrics)
+   11.14 Certification summary
+12.Security
+   12.1 RAM defenses: memory firewalls in the engine
+13.Limits and constants
+   13.1 Session environment variables (new in v2.3.0)
+   13.1b Safeguard environment variables (new in v2.3.5)
+   13.2 SSH environment variables (v2.1.4 / v2.2.2)
+14.Environment control variables (v2.3.0/v2.2.2)
+15.Possible issues
+   15.1 False positive control in bloom filter
+16.Design philosophy
+   16.1 Conscious architectural limitations
+17.Edge cases and memory limits (edge cases)
+   17.1 Structural analysis of the "Frankenstein repo"
+18.Optimization paths (roadmap)
+19.Tui demos
+20.Best practices for cron and production automation
+   20.1 Volatile credentials protocol (ram-only)
+   20.2 Basic script: daily backup with log
+   20.3 Complete script: backup + verify + prune + alerts
+   20.4 Log rotation with logrotate
+   20.5 Alerts if verify fails (without complete script)
+   20.6 Monitoring with nagios / zabbix / Prometheus
+   20.7 Backup to nas / USB disk with retry
+   20.8 Complete cron entries (copy and paste)
+   20.9 Production checklist
+21.Comparison with other backup tools
+22.FAQ - what it can and cannot do (frequently asked questions)
+   22.1  Can I use baresnap with SSH?
+   22.2  Can I backup to the cloud (S3, b2, gcs)?
+   22.3  Can I mix lz4 and zstd in the same repository?
+   22.4  How does the engine detect what compression each chunk USES?
+   22.5  Can I change the compression of AN existing repo?
+   22.6  What happens if there is A power outage during A backup?
+   22.7  Can I restore A single file?
+   22.8  Does it work on windows or mac?
+   22.9  What happens if I forget the passphrase?
+   22.10 Can I backup A complete disk (block device)?
+   22.11 How much space does the repo need?
+   22.12 Can I run baresnap from A rescue livecd?
+   22.13 Can I use baresnap as a backup server for multiple machines?
+   22.14 Why are SSH backups so fast?
+23.SSH remote backend (vfs and lightweight agent)
+   23.1 Architecture
+   23.2 Authentication
+   23.3 Pack Uploads in v2.3.8
+   23.4 Existing Pack Verification
+   23.5 Maintained SSH Optimizations
+   23.6 Advantages over SFTP
+   23.7 Requirements
+   23.8 Packer Isolation Against Total Deduplication
+   23.9 Concurrency and Fine-Grained Mutexes
+   23.10 Elastic pause protocol for disk saturation (new in v2.3.6)
+24.Resilience and performance
+25.C11 engine API reference
+   25.1  BASE types and constants
+   25.2  KVV (key verification value)
+   25.3  Format magics
+   25.4  Flags
+   25.5  Delta encoding
+   25.6  Argon2 KDF
+   25.7  Operational limits
+   25.8  Enums
+   25.9  Structures
+   25.10 Support functions
+   25.11 Stable public repository API
+   25.12 Progress and cancellation callback
+   25.13 Data commands (create, restore, extract)
+   25.14 Verification commands (verify, info, diff)
+   25.15 Management commands (list, prune, load_key, ls)
+   25.16 Index and bloom filters
+   25.17 Dynamic buffer
+   25.18 Filesystem utilities
+   25.19 Fastcdc and streaming chunker
+26.Remote agent (baresnap-remote)
+   26.1  Overview
+   26.2  Architecture and data structure
+   26.3  Main loop
+   26.4  Handle management
+   26.5  Path validation and confinement
+   26.5a snprintf validation in handle_list (FIX v2.3.0)
+   26.6  POSIX operation handlers
+   26.7  Smart SSH protocol v2 (sync_index, upload_pack)
+   26.8  Close message
+   26.9  Main dispatch
+   26.10 Agent environment variables
+   26.11 Security considerations
+   26.12 Installation and usage
+   26.13 Diagnostics and common errors
+27.SSH binary protocol
+   27.1  Protocol overview
+   27.2  Header format (6 bytes)
+   27.3  Message types (client -> server)
+   27.4  Response types (server -> client)
+   27.5  Open flags
+   27.6  Payload formats per message
+   27.7  Smart SSH protocol v2 (sync_index, upload_pack)
+   27.8  Dev error format
+   27.9  Protocol v3 (high level)
+   27.10 Timeout and retries
+   27.11 Typical message sequences (create, restore, verify)
+   27.12 Client functions (brs_remote)
+   27.13 Protocol environment variables
+   27.14 Wire format: hex examples of RPC messages
+28.Security Audit and Applied Fixes (v2.3.4)
+29.Progress bars in CLI creation and extraction
+30.Mandatory requirement for TUI navigation under SSH
+31.Persistence of the post-extraction SSH channel (f6) in the TUI
+32.Changelog
+33.Program metrics
+34.Author's notes
+35.AI notes
+36.Program history
+37.License
+38.Forensic engineering section: combat log and critical patches
+39.Alphabetical glossary
+   39.1  Terms A - B
+   39.2  Terms C - D
+   39.3  Terms E - H
+   39.4  Terms I - L
+   39.5  Terms M - P
+   39.6  Terms R - S
+   39.7  Terms T - Z
 
 ==============================================================================
 1. WHAT IS BARESNAP
@@ -9270,7 +9270,7 @@ tests Well, the megatest, a beastly bash 332,938 bytes en 8650 lines
 third_party, includes the source code of aes-gcm, monocypher, ncurses-6.5, xdelta, and zstd
 
 docs, the PDF and TXT manual, what you are reading now, a "bible" of 
-178 pages with 217 bookmarks and 217 internal links.
+178 pages with 220 bookmarks and 220 internal links.
 
 
 Scripts_compilers, explained above assets, Some Lore, not as beastly as 
@@ -9390,7 +9390,7 @@ risk or consider deployment in controlled environments.
 ###############################################################################
 FORENSIC ALERT: ENTROPY CONTROL IN DOCUMENTATION
 ###############################################################################
-This technical manual consists of 178 pages, 217 markers, and 217 internal 
+This technical manual consists of 178 pages, 220 markers, and 220 internal 
 binary links generated natively from plain text by 'txt2pdf'. However, 
 the user and engineer must process this text with technical criteria:
 
