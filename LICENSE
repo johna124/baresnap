@@ -794,3 +794,38 @@ may consider it more useful to permit linking proprietary applications with
 the library.  If this is what you want to do, use the GNU Lesser General
 Public License instead of this License.  But first, please read
 <https://www.gnu.org/licenses/why-not-lgpl.html>.
+
+===============================================================================
+APPENDIX: ADDITIONAL TERMS PERMITTED UNDER GPLv3 SECTION 7(b)
+===============================================================================
+ADDENDUM TO SECTION 7(b) OF THE GNU GENERAL PUBLIC LICENSE V3.0: 
+NOTICE OF SUBSTANTIAL HUMAN AUTHORSHIP & HYBRID ENGINEERING SPECIFICATIONS
+
+Pursuant to Section 7(b) of the GNU General Public License version 3.0, the 
+original licensor hereby requires the preservation of this specific legal notice 
+and attribution of human authorship on all present and future iterations, forks, 
+and derivative works of this material.
+
+1. ASSERTION OF PRIMARY INTELLECTUAL AUTHORSHIP:
+This software is not an unguided autonomous generation. The system architecture, 
+modular boundary layout, deterministic operational constraints, and strict 
+algorithmic topologies were entirely conceived, structured, and dictated by the 
+undersigned human author. 
+
+2. MECHANICAL COMPILATION STATUS OF GENERATIVE TOOLS:
+Any utilization of Large Language Model (LLM) interfaces during development 
+functioned strictly as a non-autonomous, machine-assisted boilerplate compilation 
+subsystem. The artificial intelligence tool acted solely as a highly responsive, 
+stateless synthesizer executing raw instructions under continuous human oversight, 
+iterative manual prompting, and relentless QA gauntlet enforcement. 
+
+3. INVIOLABILITY OF AUTHORSHIP ATTRIBUTION:
+For all legal, copyright, and contractual intents and purposes, complete 
+intellectual authorship and ultimate technical veto power reside with the human 
+architect. The engineering grid belongs to real human grit. 
+
+Any distribution, modification, or commercial sub-packaging of this software—
+including containerization or autonomous deployment pipelines—must retain this 
+notice unaltered, binding all downstream users to recognize the substantial 
+human input driving this codebase.
+===============================================================================
