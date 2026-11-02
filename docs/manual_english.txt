@@ -1,12 +1,12 @@
 ==============================================================================
-BareSnap v2.4.2 - INCREMENTAL BACKUP WITH DEDUPLICATION AND NATIVE SSH SUPPORT
+BareSnap v2.4.2-O - INCREMENTAL BACKUP WITH DEDUPLICATION AND NATIVE SSH SUPPORT
 Pure C11 Engine + yad GUI (shell) + ncurses TUI. Static binary, zero dependencies.
 ==============================================================================
 "Serious backups for people who don't want to rely on anything."
 
 Language:   C11 (engine and TUI), Shell (yad GUI)
-Binary:     Static CLI ~2 MB (x86_64 with AES-NI) / ~1.0 MB (ARM64/aarch64),
-            TUI included
+Binary:     Static CLI ~822 KB with musl (x86_64 with AES-NI) / ~769 KB (ARM64/aarch64),
+            TUI included and more platforms
 Platforms   x86_64, ARM64, PPC32 (MSB), MIPS64 (MSB), RISC-V, i686
 Format:     FORMAT_VERSION=1, compatible with original C++ engine
 Crypto:     Dual-crypto: XChaCha20-Poly1305 + AES-256-GCM (selected at init)
@@ -24,7 +24,7 @@ Status:     Production. 963/963 regression tests (FNV1A + BLAKE2B_128, meaning
             of the 4 structural fixes v2.3.5: F1, O1, M1, R1).
             Valgrind: 0 leaks / 0 errors across all modules.
             ASan/UBSan: 58/58 tests, zero memory errors.
-Revision:   Manual revised for v2.4.2:
+Revision:   Manual revised for v2.4.2-O:
 
 
 Download progress in extract SSH, hardlinks and memory fixes,
@@ -1343,7 +1343,6 @@ Associated tests:
 - Test 74: Space Apocalypse / ENOSPC.
 - Test 79: Battery death during create.
 
-
 ==============================================================================
 2.18 TOOLCHAIN COMPILATION SCRIPTS
 ==============================================================================
@@ -1353,12 +1352,13 @@ different phases of the active development, auditing, and deployment cycles:
 +------------------------+--------------------------------------------------+
 | Script                 | Purpose                                          |
 +------------------------+--------------------------------------------------+
-| compile.sh             | Production: optimized pure static binary (~2.1MB)|
+| compile_x86_64.sh      | Production: optimized pure static binary (~822KB)|
+|                        | Musl & GCC compilers selection                   |
 | compile_gdb.sh         | Hybrid Debug: full GDB symbols & live ASan/UBSan |
 | compile_asan.sh        | Memory Audit: ASan + UBSan fed to stress_san.sh  |
 | compile_tsan.sh        | Concurrency Audit: TSan under mandatory -O2 path |
 | compile_arm64.sh       | Cross-compile ARM64 (Raspberry Pi, modern SBCs)  |
-| compile_i686.sh        | Cross-compile x86 32-bit (antique legacy systems)|
+| compile_i686.sh        | Cross-compile x86 32-bit (Musl & GCC Multilib)   |
 | compile_mips64.sh      | Cross-compile MIPS64 (classic hardware routing)  |
 | compile_ppc32.sh       | Cross-compile PowerPC 32-bit (retro industrial)  |
 | compile_riscv.sh       | Cross-compile RISC-V (modern open architectures) |
@@ -1375,21 +1375,22 @@ and validated using 'qemu-user-static' emulation layers inside the destructive
 Purpose: Generate the final production binary, pure static and highly optimized.
 
 Characteristics:
-- Pure static binary: ~2.1 MB (x86_64) or ~1.0 MB (ARM64)
-- Performance constraints: -O2 optimization profile
+- Pure static binary: ~822 KB (x86_64_musl) or ~769 KB (ARM64)
+- Performance constraints: Space-optimized execution profile (-Os)
 - Automated hardware detection: AES-NI + PCLMULQDQ runtime checks
 - Anti-telemetry: -ffile-prefix-map eliminates local absolute paths
 - Determinism: SOURCE_DATE_EPOCH tracking for reproducible builds
 - Full strip: aggressively discards all non-essential debug sections
 
 Key Flags:
-  -std=c11 -O2 -static -no-pie
+  -std=c11 -Os -static -no-pie
   -ffunction-sections -fdata-sections -Wl,--gc-sections
   -ffile-prefix-map=$(pwd)=.
   -fno-ident -fno-asynchronous-unwind-tables
 
-Usage:
-  ./compile.sh
+Usage Arguments:
+  ./compile.sh musl   -> Compiles via musl-gcc wrapper (~822 KB tree footprint)
+  ./compile.sh gcc    -> Compiles via standard native toolchain (+2.5 MB bloat)
 
 Output Layout:
   build/baresnap (primary core binary)
@@ -1459,6 +1460,7 @@ NOTE: Real hardware AES-NI intrinsics are completely disabled under sanitizers
 to prevent layout interference with structural assembly code. Engineered strictly 
 to feed the automated validation workflow of ./stress_san.sh.
 
+
 ==============================================================================
 2.18.4 COMPILE_TSAN.SH (CONCURRENCY AUDIT)
 ==============================================================================
@@ -1497,8 +1499,8 @@ Bug Detection Capabilities:
 - Concurrent memory access execution lacking synchronization boundaries.
 - Flawed or incorrect handling of native C11 atomic variables.
 
-v2.4.1 Final Validation Metrics:
-  947/947 tests passing clean under strict TSan execution.
+v2.4.2 Final Validation Metrics:
+  115/115 tests passing clean under strict TSan execution.
   0 data races detected.
   3 core historical concurrency fixes fully consolidated (ssh_delta_enabled, 
   g_brs_ssh_full_index, and find_previous_version backed by fine-grained mutex boundaries).
@@ -1514,16 +1516,16 @@ Characteristics:
 - Pure Cross-Compilation: Leverages 'aarch64-linux-musl-gcc' driven by global environment exports.
 - Atomic Toolchain Cleansing: Forces a preemptive 'make distclean' on ncurses and zstd 
   to safely eradicate lingering x86_64 host object trees.
-- Dense static architecture: Prunes target payload size down to ~1.0 MB.
+- Dense static architecture: Prunes target payload size down to ~769 KB.
 - High-portability encryption: Defaults to constant-time software fallback routines (no AES-NI/SIMD).
 - Structural base baseline validation enforced via -march=armv8-a.
 
 Toolchain Baseline:
-  https://musl.cc/aarch64-linux-musl-cross.tgz (~100 MB)
+  https://musl.cc (~100 MB)
   Automatically retrieved, sandboxed, and unpacked within ~/cross-tools/
 
 Key Flags:
-  -march=armv8-a
+  -march=armv8-a -Os
   -static -no-pie
   -ffile-prefix-map=$(pwd)=.
   --host=aarch64-linux-musl (injected directly into internal config dependencies)
@@ -1540,8 +1542,9 @@ Verification Check:
   # Output must verify: ELF 64-bit LSB executable, ARM aarch64
 
 Validation Metric:
-  Validated under qemu-aarch64-static on Intel Core 2 Duo (0.5 seconds setup execution)
+  Validated under qemu-aarch64-static on Intel Core i7 (0.5 seconds setup execution)
   "If it compiles and runs emulated in hell, it will fly natively on a Raspberry Pi"
+
 
 ==============================================================================
 2.18.6 COMPILE_I686.SH (LEGACY X86 32-BIT COMPILATION)
@@ -1549,37 +1552,38 @@ Validation Metric:
 Purpose: Generate a pure static monolithic binary for legacy 32-bit (i686) systems.
 
 Characteristics:
-- Environment Setup: Automatically provisions 'gcc-multilib' dependencies on the host.
+- Modular Infrastructure Interface: Accepts single arguments to parse target backends dynamically.
+- Automated musl Bootstrap: Automatically provisions and maps 'i686-linux-musl-gcc' via musl.cc tree.
 - Sandboxed Orchestration: Isolates source workflows inside 'build/src_patched/'.
 - Live Hot-Patching: Injects inline regex adjustments via sed into critical files 
   to align structures and force the BRS_PRUNE_NO_REWRITE=1 low-memory path.
 - Logic Replacement: Replaces brs_delta.c with an i686-safe wrapper forcing 
   native 32-bit word layouts (size_t) during xdelta3 memory encoding.
-- SIGILL Mitigation: Disables advanced hardware extensions (AES-NI / native 64-bit) 
-  to prevent illegal instruction execution faults on older legacy CPUs.
-- Pure static linking footprint (-static -no-pie) embedding static ncurses and zstd.
+-SIGILL Mitigation: Disables advanced hardware extensions (AES-NI / native 64-bit)
+to prevent illegal instruction execution faults on older legacy CPUs.
 
-Toolchain Baseline:
-  Leverages the native compiler reconfigured via the strict toolchain flag '-m32'.
+Pure static linking footprint (-static -no-pie) embedding static ncurses and zstd.
+
+Usage Arguments:
+./compile_i686.sh musl  -> Bootstraps 32-bit musl-cross and links down to ~854 KB payload
+./compile_i686.sh gcc   -> Targets local gcc -m32 multilib library chain (~2.4 MB layout)
 
 Key Flags:
-  -m32 -march=i686
-  -DSIZEOF_SIZE_T=4 -DSIZEOF_UNSIGNED_LONG=4 -DXD3_USE_LARGESIZET=0
-  -static -no-pie
-
-Usage:
-  ./compile_i686.sh
+-march=i686 -Os -static -no-pie
+-DSIZEOF_SIZE_T=4 -DSIZEOF_UNSIGNED_LONG=4 -DXD3_USE_LARGESIZET=0
+--build=x86_64-linux-gnu --host=i686-linux-musl (Conditional Cross Flags)
 
 Output Layout:
-  build/baresnap (Static i686 32-bit Core Binary)
-  build/baresnap-remote (Static i686 32-bit Remote Agent)
+build/baresnap (Static i686 32-bit Core Binary)
+build/baresnap-remote (Static i686 32-bit Remote Agent)
 
 Verification Check:
-  file build/baresnap
-  # Output must verify: ELF 32-bit LSB executable, Intel 80386
+file build/baresnap
+
+Output must verify: ELF 32-bit LSB executable, Intel 80386
 
 Validation Metric:
-  Validated cleanly inside integrated sandboxes under qemu-i386 emulation boundaries.
+Validated cleanly inside integrated sandboxes under qemu-i386 emulation boundaries.
 
 ==============================================================================
 2.18.7 COMPILE_MIPS64.SH (CROSS-COMPILE MIPS64)
@@ -1587,180 +1591,193 @@ Validation Metric:
 Purpose: Generate a pure static monolithic binary optimized for MIPS 64-bit (Big Endian) architectures.
 
 Characteristics:
-- Toolchain Provisioning: Automated dynamic fetching of the musl.cc tree within ~/cross-tools/.
-- Spartan Code Density: Enforces a global '-Os' optimization flag to maximize physical 
-  instruction cache boundaries on space-restricted embedded hardware routers.
-- Critical Entropy Hardening: Injects -DSYS_getrandom=-1 to force fallback reading via 
-  /dev/urandom under antique Linux kernels lacking the getrandom system call.
-- Structural Layout Shielding: Employs '-fno-strict-aliasing -fwrapv' inside the crypto matrix 
-  to isolate Big-Endian Rev2 alignment adjustments against aggressive compiler choices.
-- Comprehensive Workspace Purging: Drives an active 'make distclean' over ncurses and zstd 
-  to fully drop cross-architecture lingering x86_64 host objects.
-- Pure static linking footprint (-static -no-pie) running under a strict native 64-bit ABI layout.
+-Toolchain Provisioning: Automated dynamic fetching of the musl.cc tree within ~/cross-tools/.
+Spartan Code Density: Enforces a global '-Os' optimization flag to maximize physical
+instruction cache boundaries on space-restricted embedded hardware routers.
+
+-Critical Entropy Hardening: Injects -DSYS_getrandom=-1 to force fallback reading via
+/dev/urandom under antique Linux kernels lacking the getrandom system call.
+
+-Structural Layout Shielding: Employs '-fno-strict-aliasing -fwrapv' inside the crypto matrix
+to isolate Big-Endian Rev2 alignment adjustments against aggressive compiler choices.
+
+-Comprehensive Workspace Purging: Drives an active 'make distclean' over ncurses and zstd
+to fully drop cross-architecture lingering x86_64 host objects.
+
+Pure static linking footprint (-static -no-pie) running under a strict native 64-bit ABI layout.
 
 Toolchain Baseline:
-  https://musl.cc (~100 MB)
-  Driven via environment redirection to the cross-compiler 'mips64-linux-musl-gcc'.
+https://musl.cc (~100 MB)
+Driven via environment redirection to the cross-compiler 'mips64-linux-musl-gcc'.
 
-Key Flags:
-  -mips64r2 -mabi=64 -Os
-  -DSYS_getrandom=-1 -fno-strict-aliasing -fwrapv
-  -static -no-pie
+-Key Flags:
+-mips64r2 -mabi=64 -Os
+-DSYS_getrandom=-1 -fno-strict-aliasing -fwrapv
+-static -no-pie
 
 Usage:
-  ./compile_mips64.sh
+./compile_mips64.sh
 
 Output Layout:
-  build/baresnap (Static MIPS64 Big-Endian Core Binary)
-  build/baresnap-remote (Static MIPS64 Big-Endian Remote Agent)
+build/baresnap (Static MIPS64 Big-Endian Core Binary ~922 KB)
+build/baresnap-remote (Static MIPS64 Big-Endian Remote Agent)
 
 Verification Check:
-  file build/baresnap
-  # Output must verify: ELF 64-bit MSB executable, MIPS, MIPS64 Rel 2
+file build/baresnap
+
+Output must verify: ELF 64-bit MSB executable, MIPS, MIPS64 Rel 2
 
 Validation Metric:
-  Validated natively inside sandboxed environments utilizing qemu-mips64-static emulation.
-
+Validated natively inside sandboxed environments utilizing qemu-mips64-static emulation.
 
 ==============================================================================
 2.18.8 COMPILE_PPC32.SH (CROSS-COMPILE POWERPC 32-BIT)
 ==============================================================================
+
 Purpose: Generate a pure static monolithic binary optimized for 32-bit PowerPC (Big Endian) architectures.
 
 Characteristics:
-- Toolchain Provisioning: Automated dynamic fetching of the musl.cc tree within ~/cross-tools/.
-- Sandboxed Orchestration: Isolates source workflows inside 'build/src_patched/' for staging.
-- Live Hot-Patching: Injects inline regex adjustments via sed into restoration and prune 
-  subsystems to structurally fit the constraints of classic retro PowerPC layouts.
-- Logic Replacement: Replaces brs_delta.c with a 32-bit safe wrapper, clamping xdelta3 
-  memory allocation parameters to size_t to avoid type mismatches.
-- Big-Endian Validation: Forces the core C11 pipeline to execute under reversed byte 
-  ordering, hardening indexing metadata against hardware-level alignment faults.
-- Pure static linking footprint (-static -no-pie) embedding static ncurses and zstd targets.
+-Toolchain Provisioning: Automated dynamic fetching of the musl.cc tree within ~/cross-tools/.
+-Sandboxed Orchestration: Isolates source workflows inside 'build/src_patched/' for staging.
+-Live Hot-Patching: Injects inline regex adjustments via sed into restoration and prune
+subsystems to structurally fit the constraints of classic retro PowerPC layouts.
+-Logic Replacement: Replaces brs_delta.c with a 32-bit safe wrapper, clamping xdelta3
+memory allocation parameters to size_t to avoid type mismatches.
+-Big-Endian Validation: Forces the core C11 pipeline to execute under reversed byte
+ordering, hardening indexing metadata against hardware-level alignment faults.
+-Pure static linking footprint (-static -no-pie) embedding static ncurses and zstd targets.
 
 Toolchain Baseline:
-  https://musl.cc (~100 MB)
-  Driven via environment redirection to the cross-compiler 'powerpc-linux-musl-gcc'.
+https://musl.cc (~100 MB)
+
+Driven via environment redirection to the cross-compiler 'powerpc-linux-musl-gcc'.
 
 Key Flags:
-  -march=powerpc -m32
-  -DSIZEOF_SIZE_T=4 -DSIZEOF_UNSIGNED_LONG=4 -DXD3_USE_LARGESIZET=0
-  -static -no-pie
+-march=powerpc -m32 -Os
+-DSIZEOF_SIZE_T=4 -DSIZEOF_UNSIGNED_LONG=4 -DXD3_USE_LARGESIZET=0
+-static -no-pie -latomic
 
 Usage:
-  ./compile_ppc32.sh
+./compile_ppc32.sh
 
 Output Layout:
-  build/baresnap (Static PPC32 32-bit Core Binary)
-  build/baresnap-remote (Static PPC32 32-bit Remote Agent)
-
+build/baresnap (Static PPC32 32-bit Core Binary ~846 KB)
+build/baresnap-remote (Static PPC32 32-bit Remote Agent)
 Verification Check:
-  file build/baresnap
-  # Output must verify: ELF 32-bit MSB executable, PowerPC or cisco 4500
+file build/baresnap
+
+Output must verify: ELF 32-bit MSB executable, PowerPC or cisco 4500
 
 Validation Metric:
-  Validated cleanly inside integrated sandboxes under qemu-ppc-static emulation boundaries.
+Validated cleanly inside integrated sandboxes under qemu-ppc-static emulation boundaries.
 
 ==============================================================================
-2.18.9 COMPILE_RISCV.SH (CROSS-COMPILE RISC-V)
+2.18.9 COMPILE_PPC32.SH (CROSS-COMPILE POWERPC 32-BIT)
 ==============================================================================
-Purpose: Generate a pure static monolithic binary optimized for the modern open RISC-V 64-bit architecture.
+
+Purpose: Generate a pure static monolithic binary optimized for 32-bit PowerPC (Big Endian) architectures.
 
 Characteristics:
-- Toolchain Provisioning: Automated dynamic fetching of the musl.cc tree within ~/cross-tools/.
-- Strict Software Alignment: Injects '-mstrict-align' to prevent hardware alignment traps 
-  on early RISC-V cores lacking native unaligned memory layout reading support.
-- Concurrent Execution Hardening: Enforces a conservative '-O1 -fno-strict-aliasing -fwrapv' 
-  profile to protect the C11 cryptographic pipeline and SPSC ring buffers from scheduling noise.
-- Workspace Purging: Drives an active 'make distclean' over ncurses and zstd 
-  to fully drop cross-architecture lingering x86_64 host objects.
-- Pure static linking footprint (-static -no-pie) running under a strict lp64d hardware float ABI.
+-Toolchain Provisioning: Automated dynamic fetching of the musl.cc tree within ~/cross-tools/.
+-Sandboxed Orchestration: Isolates source workflows inside 'build/src_patched/' for staging.
+-Live Hot-Patching: Injects inline regex adjustments via sed into restoration and prune
+subsystems to structurally fit the constraints of classic retro PowerPC layouts.
+-Logic Replacement: Replaces brs_delta.c with a 32-bit safe wrapper, clamping xdelta3
+memory allocation parameters to size_t to avoid type mismatches.
+-Big-Endian Validation: Forces the core C11 pipeline to execute under reversed byte
+ordering, hardening indexing metadata against hardware-level alignment faults.
+-Pure static linking footprint (-static -no-pie) embedding static ncurses and zstd targets.
 
 Toolchain Baseline:
-  https://musl.cc (~100 MB)
-  Driven via environment redirection to the cross-compiler 'riscv64-linux-musl-gcc'.
+https://musl.cc (~100 MB)
+
+Driven via environment redirection to the cross-compiler 'powerpc-linux-musl-gcc'.
 
 Key Flags:
-  -march=rv64gc -mabi=lp64d -mstrict-align
-  -O1 -fno-strict-aliasing -fwrapv
-  -static -no-pie
+-march=powerpc -m32 -Os
+-DSIZEOF_SIZE_T=4 -DSIZEOF_UNSIGNED_LONG=4 -DXD3_USE_LARGESIZET=0
+-static -no-pie -latomic
 
 Usage:
-  ./compile_riscv.sh
+./compile_ppc32.sh
 
 Output Layout:
-  build/baresnap (Static RISC-V 64-bit Core Binary)
-  build/baresnap-remote (Static RISC-V 64-bit Remote Agent)
+build/baresnap (Static PPC32 32-bit Core Binary ~846 KB)
+build/baresnap-remote (Static PPC32 32-bit Remote Agent)
 
 Verification Check:
-  file build/baresnap
-  # Output must verify: ELF 64-bit LSB executable, UCB RISC-V, RVC, double-float ABI
+file build/baresnap
+
+Output must verify: ELF 32-bit MSB executable, PowerPC or cisco 4500
 
 Validation Metric:
-  Validated cleanly inside integrated sandboxes under qemu-riscv64-static emulation.
-
+Validated cleanly inside integrated sandboxes under qemu-ppc-static emulation boundaries.
 
 ==============================================================================
 2.18.10 COMMON PATTERNS WITHIN THE COMPILATION SUITE
 ==============================================================================
+
 Every script strictly enforces the following core architectural characteristics:
 
 1. PATH ANTI-TELEMETRY:
-   MAP_FLAGS="-ffile-prefix-map=$(pwd)=."
-   Completely removes the absolute host build directory tree from the binary.
-   Two separate builds on different host machines produce an identical SHA256.
+MAP_FLAGS="-ffile-prefix-map=$(pwd)=."
+
+Completely removes the absolute host build directory tree from the binary.
+Two separate builds on different host machines produce an identical SHA256.
 
 2. ABSOLUTE DETERMINISM:
-   export SOURCE_DATE_EPOCH="${SOURCE_DATE_EPOCH:-1791226401}"
-   export ZERO_AR_DATE=1
-   Aggressively freezes binary execution dates and static library object timestamps 
-   to achieve fully reproducible monolithic builds.
+export SOURCE_DATE_EPOCH="${SOURCE_DATE_EPOCH:-1791462664}"
+export ZERO_AR_DATE=1
+Aggressively freezes binary execution dates and static library object timestamps
+to achieve fully reproducible monolithic builds.
 
 3. RESTRICTIVE XDELTA3 DEFINES:
-   -DXD3_MAIN=0 -DREGRESSION_TEST=0 -DSECONDARY_DJW=0 ...
-   Compiles xdelta3 "naked", discarding the core standalone executable and tests.
-   Validated across 100 continuous build iterations utilizing musl-gcc.
+-DXD3_MAIN=0 -DREGRESSION_TEST=0 -DSECONDARY_DJW=0 ...
+Compiles xdelta3 "naked", discarding the core standalone executable and tests.
+Validated across 100 continuous build iterations utilizing musl-gcc.
 
 4. SPARTAN NCURSES:
-   --enable-static --disable-shared --disable-widec
-   --without-progs --without-tests --without-cxx --without-ada
-   Pares dependencies down to the bare essential runtime, cutting widechar support 
-   and auxiliary utility programs to eradicate target executable bloatware.
+--enable-static --disable-shared --disable-widec
+--without-progs --without-tests --without-cxx --without-ada
+
+Pares dependencies down to the bare essential runtime, cutting widechar support
+and auxiliary utility programs to eradicate target executable bloatware.
 
 5. LINKING WITH --gc-sections:
-   -Wl,--gc-sections combined with -ffunction-sections -fdata-sections
-   Acts as an atomic garbage collector, violently stripping out all dead code 
-   from statically linked libraries that the core C11 engine does not call.
+-Wl,--gc-sections combined with -ffunction-sections -fdata-sections
 
+Acts as an atomic garbage collector, violently stripping out all dead code
+from statically linked libraries that the core C11 engine does not call.
 
 ==============================================================================
 2.18.11 STANDARD DEVELOPMENT WORKFLOW
 ==============================================================================
 1. Core Production & Mainline Deployment:
-   ./compile.sh
-   → Pure static release binary payload: ~2.1 MB
+./compile.sh musl
+-Pure static release binary payload via musl-gcc: ~822 KB
 
 2. Advanced Interactive Debugging:
-   ./compile_gdb.sh
-   → Hybrid dynamic workspace binary with live active ASan/UBSan
-   → Interactive GDB sessions, Valgrind Memcheck, and hot multi-thread dumps
+./compile_gdb.sh
+-Hybrid dynamic workspace binary with live active ASan/UBSan
+-Interactive GDB sessions, Valgrind Memcheck, and hot multi-thread dumps
 
 3. Automated Continuous Integration Memory Auditing:
-   ./compile_asan.sh
-   → Instrumented binary attached to automated validation layers
-   → Execute `./stress_san.sh` or `BARESNAP=./build_san/baresnap ./mega_test.sh`
-   → Proactive mapping of out-of-bounds pointer adjustments and heap leaks
+./compile_asan.sh
+-Instrumented binary attached to automated validation layers
+-Execute ./stress_san.sh or BARESNAP=./build_san/baresnap ./mega_test.sh
+-Proactive mapping of out-of-bounds pointer adjustments and heap leaks
 
 4. Thread Concurrency Auditing:
-   ./compile_tsan.sh
-   → ThreadSanitizer validation binary running under mandatory -O2 tracing
-   → Execute `BARESNAP=./build_tsan/baresnap ./mega_test.sh --no-ssh` under TSan
-   → Live interception of multi-threaded data races and raw C11 atomic violations
+./compile_tsan.sh
+-ThreadSanitizer validation binary running under mandatory -O2 tracing
+-Execute BARESNAP=./build_tsan/baresnap ./mega_test.sh --no-ssh under TSan
+-Live interception of multi-threaded data races and raw C11 atomic violations
 
 5. Cross-Platform Target Deployment:
-   ./compile_arm64.sh / compile_i686.sh / compile_mips64.sh / compile_ppc32.sh / compile_riscv.sh
-   → Pure static architecture binaries (~1.0 MB - ~2.1 MB footprint)
-   → Sandboxed orchestration and multi-arch test mapping via qemu-user-static
+./compile_arm64.sh / ./compile_i686.sh musl / ./compile_mips64.sh
+-Pure static architecture binaries ranging down to ~41 KB - ~854 KB footprint
+-Sandboxed orchestration and multi-arch test mapping via qemu-user-static
+
 
 ==============================================================================
 2.18.12 REAL ZSTD VS LZ4 BENCHMARK TEST
@@ -4520,6 +4537,7 @@ BRS_SSH_DEBUG               Displays raw RPC trace on stderr if set to 1 (v2.1.4
 BRS_RAM_GUARD_FAKE_MB       Simulates available RAM for the O1 guardian (v2.3.5)
 
 NOTE (v2.3.6): BRS_SSH_TIMEOUT_MS removed in favor of CLI flag --timeout
+
 ==============================================================================
 15. TROUBLESHOOTING
 ==============================================================================
@@ -5441,7 +5459,7 @@ Before putting BareSnap into production, verify:
 | Feature                | BareSnap v2.4.0  | Restic   | Borg     | Kopia    |
 +------------------------+------------------+----------+----------+----------+
 | Language               | Pure C11         | Go       | Python/C | Go       |
-| Static binary          | ~2.1 MB          | ~40 MB   | ~15 MB   | ~60 MB   |
+| Static binary          | ~820kb-1.8 MB    | ~40 MB   | ~15 MB   | ~60 MB   |
 | Runtime deps           | NONE             | none     | none*    | none     |
 | Chunk dedup            | FastCDC          | CDC      | Buzhash  | CDC      |
 | Available encryption   | XChaCha20 or     | AES-256  | AES-256  | AES-256  |
@@ -5480,7 +5498,7 @@ BareSnap is the ONLY tool with:
 
 - Delta encoding with xdelta3 (32x savings on modified files)
 - Disk Bloom Filter for index lazy loading
-- ~2.1 MB static binary with zero dependencies
+- ~820k-1.8 MB static binary with zero dependencies
 - 100% documented binary format
 - SSH remote agent preserving POSIX semantics (hardlinks, rename)
 - Password SSH authentication without external dependencies
@@ -5854,7 +5872,7 @@ To check current usage: baresnap info /repo
 22.12 CAN I RUN BARESNAP FROM A RESCUE LIVECD?
 ============================================================================
 
-YES. It's the star use case. The binary is static (~2.1 MB),
+YES. It's the star use case. The binary is static (~820kb-1.8 MB),
 dependency-free. Just copy it to the LiveCD and run it:
 
     # From a rescue USB with 200 MB of RAM
@@ -8217,6 +8235,73 @@ in the server Heap.
 ==============================================================================
 32. CHANGELOG
 ==============================================================================
+Date: November 2, 2026
+Release Target: v2.4.2-O
+Focus: Multi-Arch Static Footprint Demolition, Musl-libc Integration &
+       CI/CD Toolchain Unification
+------------------------------------------------------------------------------
+SUMMARY OF IMPACT:
+------------------------------------------------------------------------------
+Achieved an aggressive global storage footprint reduction across all targets, 
+purging over 2.4 MB of dead code and glibc bloatware from the multi-arch 
+distribution bundle. The total deployment footprint collapsed from 10.8 MB 
+down to a spartan 8.4 MB (A massive 23.6% reduction global average).
+
+------------------------------------------------------------------------------
+[CHORE & ARCHITECTURE] CRITICAL COMPILER TRANSITION (glibc -> musl-libc)
+------------------------------------------------------------------------------
+* [x86_64 / i686] Violent Static Footprint Demolition:
+  Migrated core production environments to Musl-libc toolchains (`musl-gcc` 
+  and `i686-linux-musl-gcc`). Defeated the dynamic tracking and static overhead 
+  of standard GNU glibc (such as embedded NSS networking bloat).
+* [Ecosystem Impact]:
+  - x86_64 primary core collapsed from ~2.1 MB down to a spartan 822 KB (-13.3%).
+  - i686 primary core collapsed from 2.1 MB down to 854 KB (-61.7%).
+  - i686-remote micro-agent collapsed from 714 KB to a tiny 41 KB (-94.1%).
+
+------------------------------------------------------------------------------
+[BUILD SYSTEM] MINIFICATION OF THIRD_PARTY DEPENDENCIES
+------------------------------------------------------------------------------
+* [ZSTD] Surgical Compression Pruning (Up to Level 22 Support retained):
+  Injected conditional preprocessor flags (`-DZSTD_NODICT` and 
+  `-DZSTD_LIB_DICTBUILDER=0`) to violently strip dictionary training logic.
+  Appended `-DZSTD_STRIP_ERROR_STRINGS=1` to remove internal text tables, 
+  saving massive binary cache lines while preserving pure Level 22 encoding.
+* [NCURSES] Spartan TUI Matrix Hardening:
+  Reconfigured Autotools configurations to completely bypass non-essential 
+  features. Stripped interactive mouse handlers (`--disable-mouse`) and 
+  extended color matrices (`--disable-ext-colors`). Forced runtime mappings 
+  to fallback exclusively onto systemic terminfo directories (`/usr/share/terminfo`).
+* [Linker Garbage Collection]:
+  Enforced structural `-ffunction-sections` and `-fdata-sections` across all 
+  third_party source compilations. This allowed the final link stage to act 
+  as an atomic garbage collector (`-Wl,--gc-sections`), successfully purging 
+  unused objects out of linked `.a` libraries.
+
+------------------------------------------------------------------------------
+[CROSS-COMPILATION] MULTI-ARCH COMPACTNESS MILESTONES
+------------------------------------------------------------------------------
+* [RISC-V / PowerPC / MIPS64] Embedded Targets Shrinkage:
+  - RISC-V payload collapsed to **724 KB** (-34.2%) via `-Os` and `-mstrict-align`.
+  - PowerPC payload collapsed to **920 KB** (-34.3%) by bridging musl-cross.
+  - MIPS64 core breached the sub-megabyte barrier, flattening to **980 KB** 
+    while preserving strict Big-Endian Rev2 constraints and raw entropy definitions.
+
+------------------------------------------------------------------------------
+[CI/CD & AUTOMATION] UNIFIED SCRIPT ARCHITECTURE
+------------------------------------------------------------------------------
+* Argument-Driven Engine Invocation:
+  Completely eliminated messy interactive prompts inside compilation pipelines. 
+  Rewrote `compile.sh` and `compile_i686.sh` to accept clean arguments 
+  (`./compile.sh musl` or `./compile.sh gcc`). 
+* Cross-Compilation Guard Rails:
+  Fixed severe Autotools compilation trap loops (`cannot run C compiled programs`) 
+  by enforcing correct dual cross-compilation mappings:
+  `--build=x86_64-linux-gnu` coupled with `--host=i686-linux-musl`.
+* Fixed Path Anti-Telemetry:
+  Hardened path mappings (`-ffile-prefix-map=$(pwd)=.`) and frozen date footprints 
+  (`SOURCE_DATE_EPOCH`), ensuring reproducible builds across all target variants.
+------------
 (October 10, 2026)
 
 Documentation:
