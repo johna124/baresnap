@@ -1,4 +1,4 @@
-# BareSnap v2.4.2 — The Spartan Manifesto (NIST-Vector Validated Edition)
+# BareSnap v2.4.2-O — The Spartan Manifesto (NIST-Vector Validated Edition)
 
 >> ⚠️ **ARCHITECT'S NOTE:** Let's skip the enterprise hypocrisy. I am not a professional software engineer, and nobody wrote this code byte-by-byte with a mechanical keyboard. The core C11 source is 99.5% AI-generated slop from Free-Tier web chats, structured through thousands of chaotic prompts. **We do not trust the code, nor have we audited its lines. We trust the absolute punishment of our QA Gauntlet.** The stability of BareSnap relies entirely on human criteria designing a brutal gauntlet of 963 destructive stress tests that passed on real 2007 hardware. The cynical, spartan prose of this README was styled with AI assistance for the lulz, but its correctness is enforced by raw POSIX metal.
 
@@ -146,15 +146,15 @@ To survive context poisoning and logical loops during prolonged web-chat session
 ### 🎖️ MEDALS AWARDED
 * **Weight of Silicon**:  824,103 bytes of raw C11 source code ( 18,473  lines according to `cloc`).
 * **Dependency Rejection**: 0 dynamic links (`ldd` verified). Purely static compile-time enucleation.Sanitizer builds link libasan/libubsan for instrumentation only.
-* **Binary Size**: ~2.1 MB x86_64 static stripped.
+* **Binary Size**: ~860 KB x86_64 static stripped with musl.
 * **Supported Architectures**: x86_64, ARM64, PPC32, RISCV, MIPS64, i686
 
 ---
 ## 🚀 Quick Start
 
 ```bash
-# Compile (requires gcc, make, zstd, ncurses)
-./compile.sh
+# Compile (requires gcc or musl, make, zstd, ncurses)
+./compile.sh musl or gcc
 
 # Create a repo and run a backup
 ./baresnap init /mnt/backup/repo
@@ -223,7 +223,7 @@ Sincerely,
 
 ---
 
-📜 Need more? Read the Full Technical Manual (178 pages of pure shrapnel, 220 bookmarks, and internal links!). 
+📜 Need more? Read the Full Technical Manual (179 pages of pure shrapnel, 220 bookmarks, and internal links!). 
 Generated natively from plain text by our very own static 'txt2pdf'.
 Not for the faint of heart or Kubernetes engineers.
 

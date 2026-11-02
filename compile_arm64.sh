@@ -20,9 +20,8 @@ MAP_FLAGS="-ffile-prefix-map=$(pwd)=."
 
 # ============================================================
 # Absolute determinism for SHA256 psychopaths (Reproducible Builds)
-# MISMO EPOCH QUE EL SCRIPT x86_64 PARA DETERMINISMO ENTRE ARQUITECTURAS
 # ============================================================
-export SOURCE_DATE_EPOCH="${SOURCE_DATE_EPOCH:-1791462664}"
+export SOURCE_DATE_EPOCH="${SOURCE_DATE_EPOCH:-1793637764}"
 export ZERO_AR_DATE=1
 
 echo "🍓 Target: ARM64 (Raspberry Pi / SBCs) - Forcing direct Cross-Compilation."
@@ -59,48 +58,73 @@ fi
 echo "✅ ARM64 tools ready for battle. Continuing..."
 echo ""
 
-# ARM64 does not use Intel AES-NI. Pure C fallback for crypto.
+#!/bin/bash
+set -euo pipefail
+
+MAP_FLAGS="-ffile-prefix-map=$(pwd)=."
+ABS="${ABS:-$(pwd)/build}"
+TARGET="${TARGET:-arm64}"
+STAMP="${STAMP:-$ABS/.ncurses_ok_${TARGET}}"
+STRIP_BIN="${STRIP_BIN:-strip}"
+HOST_FLAG="${HOST_FLAG:-}"
+CC="${CC:-gcc}"
+
+# ARM64 architecture flags
 ARCH_FLAGS="-march=armv8-a -fno-ident -fno-asynchronous-unwind-tables $MAP_FLAGS"
 
-# Global CFLAGS with prefix mapping for ARM64
-CFLAGS="-std=c11 -Wall -Wextra -O2 -ffunction-sections -fdata-sections -fno-ident -fno-asynchronous-unwind-tables $MAP_FLAGS -Isrc -Ithird_party/monocypher -Ithird_party/xdelta/xdelta3 -Ithird_party/aes-gcm -DHAVE_CONFIG_H=0 -DXD3_USE_LARGESIZET=1 -DXD3_MAIN=0 -DXD3_DEBUG=0 -DREGRESSION_TEST=0 -DSECONDARY_DJW=0 -DSECONDARY_FGK=0 -DSECONDARY_LZMA=0 -DEXTERNAL_COMPRESSION=0 -DVCDIFF_TOOLS=0 -DSIZEOF_SIZE_T=8 -DSIZEOF_UNSIGNED_INT=4 -DSIZEOF_UNSIGNED_LONG=8 -DSIZEOF_UNSIGNED_LONG_LONG=8 -Dusize_t=uint64_t -Dxoff_t=uint64_t"
+# Global CFLAGS configuration optimized for space (-Os)
+CFLAGS="-std=c11 -Wall -Wextra -Os -ffunction-sections -fdata-sections -fno-ident -fno-asynchronous-unwind-tables $MAP_FLAGS -Isrc -Ithird_party/monocypher -Ithird_party/xdelta/xdelta3 -Ithird_party/aes-gcm -DHAVE_CONFIG_H=0 -DXD3_USE_LARGESIZET=1 -DXD3_MAIN=0 -DXD3_DEBUG=0 -DREGRESSION_TEST=0 -DSECONDARY_DJW=0 -DSECONDARY_FGK=0 -DSECONDARY_LZMA=0 -DEXTERNAL_COMPRESSION=0 -DVCDIFF_TOOLS=0 -DSIZEOF_SIZE_T=8 -DSIZEOF_UNSIGNED_INT=4 -DSIZEOF_UNSIGNED_LONG=8 -DSIZEOF_UNSIGNED_LONG_LONG=8 -Dusize_t=uint64_t -Dxoff_t=uint64_t"
 
-ABS="$(pwd)/build"
+# Absolute determinism for SHA256 psychopaths (Reproducible Builds)
+export SOURCE_DATE_EPOCH="${SOURCE_DATE_EPOCH:-1791462664}"
+export ZERO_AR_DATE=1
+
 mkdir -p build
 
 # ---- 1. static ncurses 6.5 compiled for ARM64 ----
-STAMP="$ABS/.ncurses_ok_${TARGET}"
 if [ ! -f "$STAMP" ]; then
     cd third_party/ncurses-6.5
     echo "🧹 Cleaning ncurses to avoid x86_64 residues..."
     make distclean >/dev/null 2>&1 || true
     echo "🔨 Configuring ncurses cross-compiled for ARM64..."
-    ./configure CC="$CC" CFLAGS="-O2 -fPIC -fno-ident $MAP_FLAGS" \
-        "$HOST_FLAG" \
+    
+    NCURSES_CFLAGS="-Os -fPIC -fno-ident -ffunction-sections -fdata-sections $MAP_FLAGS"
+    
+    ./configure CC="$CC" CFLAGS="$NCURSES_CFLAGS" \
+        ${HOST_FLAG:+"$HOST_FLAG"} \
         --prefix="$ABS/staging" \
         --enable-static --disable-shared --disable-widec --enable-overwrite \
         --with-termlib --without-progs --without-tests --without-cxx \
         --without-cxx-binding --without-ada --without-manpages \
+        --disable-home-terminfo --disable-ext-colors --disable-mouse \
+        --with-fallbacks=linux,vt100,xterm,xterm-256color \
         --with-default-terminfo-dir=/usr/share/terminfo \
         --with-terminfo-dirs="/usr/share/terminfo:/lib/terminfo:/etc/terminfo"
+        
     make -j"$(nproc)"
     make install.includes install.libs
+    
+    "$STRIP_BIN" -g "$ABS/staging/lib/libncurses.a" 2>/dev/null || true
+    "$STRIP_BIN" -g "$ABS/staging/lib/libtinfo.a" 2>/dev/null || true
+    
     test -f "$ABS/staging/lib/libncurses.a"
     touch "$STAMP"
     cd ../..
 fi
 
+mkdir -p build
+
 # ---- 2. monocypher (crypto core) ----
 echo "🔐 Compiling Monocypher for ARM64..."
-$CC -std=c11 -O2 -w -fno-ident $MAP_FLAGS -c third_party/monocypher/monocypher.c -o build/monocypher.o
+$CC -std=c11 -Os -w -fno-ident $MAP_FLAGS -c third_party/monocypher/monocypher.c -o build/monocypher.o
 
 # ---- 2.5 aes-gcm in software/fallback mode for ARM64 (no AES-NI) ----
 echo "🔐 Compiling AES-256-GCM (software fallback) for ARM64..."
-$CC -std=c11 -O2 -w $ARCH_FLAGS -Ithird_party/aes-gcm -c third_party/aes-gcm/aes_gcm.c -o build/aes_gcm.o
+$CC -std=c11 -Os -w $ARCH_FLAGS -Ithird_party/aes-gcm -c third_party/aes-gcm/aes_gcm.c -o build/aes_gcm.o
 
 # ---- 3. xdelta3 (delta encoding) ----
 echo "📦 Compiling xdelta3 for ARM64..."
-$CC -std=gnu11 -O2 -w -fPIC -fno-ident $MAP_FLAGS \
+$CC -std=gnu11 -Os -w -fPIC -fno-ident $MAP_FLAGS \
     -DHAVE_CONFIG_H=0 \
     -DXD3_USE_LARGESIZET=1 \
     -DXD3_MAIN=0 \
@@ -127,12 +151,21 @@ fi
 echo "✅ Object build/xdelta3.o generated correctly."
 
 # ---- 3.5 zstd (compression) ----
-echo "🗜️  Compiling zstd for ARM64..."
+echo "🗜️  Compiling a minified zstd (Compress + Decompress, No Dicts) for ARM64..."
 cd third_party/zstd
 make distclean >/dev/null 2>&1 || true
-make -C lib CC="$CC" CFLAGS="-O2 -fPIC -fno-ident $MAP_FLAGS" libzstd.a -j"$(nproc)"
+
+MINI_CFLAGS="-Os -fPIC -fno-ident -ffunction-sections -fdata-sections $MAP_FLAGS"
+MINI_CFLAGS="$MINI_CFLAGS -DZSTD_NODICT -DZSTD_LIB_DICTBUILDER=0 -DZSTD_LEGACY_SUPPORT=0 -DZSTD_STRIP_ERROR_STRINGS=1"
+
+make -C lib CC="$CC" CFLAGS="$MINI_CFLAGS" libzstd.a -j"$(nproc)"
+
+"$STRIP_BIN" -g lib/libzstd.a 2>/dev/null || true
+
+mkdir -p "$ABS/staging/lib" "$ABS/staging/include"
+
 cp lib/libzstd.a "$ABS/staging/lib/"
-cp lib/zstd.h lib/zdict.h lib/zstd_errors.h "$ABS/staging/include/" 2>/dev/null || true
+cp lib/zstd.h lib/zstd_errors.h "$ABS/staging/include/" 2>/dev/null || true
 cd ../..
 
 # ---- 4. full binary (main baresnap with TUI) ----
@@ -184,13 +217,12 @@ if [ ! -f "build/baresnap" ]; then
     exit 1
 fi
 
-# Apply ARM64 cross-strip
 "$STRIP_BIN" --strip-all build/baresnap 2>/dev/null || true
 echo "✅ Main binary: build/baresnap"
 
 # ---- 5. remote binary (baresnap-remote agent) ----
 echo "🔗 Compiling baresnap-remote for ARM64..."
-$CC -std=c11 -O2 -Wall -Wextra -ffunction-sections -fdata-sections -fno-ident -fno-asynchronous-unwind-tables $MAP_FLAGS -Isrc \
+$CC -std=c11 -Os -Wall -Wextra -ffunction-sections -fdata-sections -fno-ident -fno-asynchronous-unwind-tables $MAP_FLAGS -Isrc \
     src/baresnap-remote.c src/brs_remote.c \
     -static -no-pie -Wl,--gc-sections -o build/baresnap-remote
 
@@ -210,10 +242,25 @@ echo "============================================================"
 echo "✅ ARM64 CROSS-COMPILATION COMPLETED SUCCESSFULLY"
 echo "============================================================"
 echo ""
-file build/baresnap
-file build/baresnap-remote
+
+for b in build/baresnap build/baresnap-remote; do
+    if [ -f "$b" ]; then
+        SIZE_BYTES=$(wc -c < "$b")
+        SIZE_KB=$((SIZE_BYTES / 1024))
+        echo "  $b : $SIZE_BYTES bytes ($SIZE_KB KB)"
+    fi
+done
+
 echo ""
-ls -lh build/baresnap build/baresnap-remote
+echo "🧬 Binary fingerprints:"
+
+for b in build/baresnap build/baresnap-remote; do
+    if [ -f "$b" ]; then
+        printf "  %-25s " "$b"
+        file -b "$b"
+    fi
+done
+
 echo ""
 echo "🍓 Ready to deploy to Raspberry Pi 3/4/5 or any ARM64 SBC."
 echo "   scp build/baresnap build/baresnap-remote user@raspberrypi:~/baresnap/"
