@@ -8227,8 +8227,6 @@ VFS al finalizar la descarga física de daltas para evitar fugas de memoria
 ==============================================================================
 32. CHANGELOG
 ==============================================================================
-BARESNAP - REGISTRO OFICIAL DE CAMBIOS DE DESARROLLO (CHANGELOG)
-==============================================================================
 Fecha: 2 de Noviembre de 2026
 Objetivo de Lanzamiento: v2.4.2-O
 Foco: Demolición de la Huella Estática Multiplataforma, Integración de Musl-libc y Unificación del Pipeline CI/CD
